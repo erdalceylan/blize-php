@@ -24,6 +24,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class MessagesController extends AbstractFOSRestController
 {
     /**
+     * @Route("/{offset}", name="messages_index")
      * @Route("/group/{offset}", name="messages")
      * @IsGranted("ROLE_USER")
      * @Rest\View(serializerGroups={"message","user"})
