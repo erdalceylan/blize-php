@@ -24,21 +24,23 @@ use Symfony\Component\Routing\Annotation\Route;
 class MessagesController extends AbstractFOSRestController
 {
     /**
-     * @Route("", name="messages")
+     * @Route("/group/{offset}", name="messages")
      * @IsGranted("ROLE_USER")
      * @Rest\View(serializerGroups={"message","user"})
      * @param MongoMessageService $mongoMessageService
      * @param UserRepository $userRepository
+     * @param int $offset
      * @return View
      */
     public function index(
         MongoMessageService $mongoMessageService,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        $offset = 0
     )
     {
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
-        $result = new ArrayCollection($mongoMessageService->getGroups($sessionUser)->toArray());
+        $result = new ArrayCollection($mongoMessageService->getGroups($sessionUser, $offset)->toArray());
         $otherUserIds = $result->map(function(MessageGroupItem $item) use ($sessionUser) {
             return $item->getTo() == $sessionUser->getId() ? $item->getFrom() : $item->getTo();
         });
@@ -58,21 +60,23 @@ class MessagesController extends AbstractFOSRestController
     }
 
     /**
-     * @Route("/{user}", name="messages_detail")
+     * @Route("/detail/{user}/{offset}", name="messages_detail")
      * @IsGranted("ROLE_USER")
      * @Rest\View(serializerGroups={"message","user"})
      * @param MongoMessageService $mongoMessageService
      * @param User $user
+     * @param int $offset
      * @return View
      */
     public function detail(
         MongoMessageService $mongoMessageService,
-        User $user
+        User $user,
+        $offset = 0
     )
     {
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
-        $result = $mongoMessageService->detail($sessionUser, $user);
+        $result = $mongoMessageService->detail($sessionUser, $user, $offset);
 
         $itemsMapped = [];
         /**@var Message $item*/

@@ -11,6 +11,9 @@ use Doctrine\ODM\MongoDB\DocumentManager;
 
 class MongoMessageService
 {
+    CONST GROUP_LIMIT = 24;
+    CONST DETAIL_LIMIT = 24;
+
     /**
      * @var DocumentManager
      */
@@ -37,7 +40,7 @@ class MongoMessageService
         return $message;
     }
 
-    public function getGroups(User $sessionUser)
+    public function getGroups(User $sessionUser, $offset = 0)
     {
         $ab = $this->dm->createAggregationBuilder(Message::class);
         $ab
@@ -77,34 +80,40 @@ class MongoMessageService
             ->field('text')->first('$text')
             ->field('date')->first('$date')
             ->field('read')->first('$read')
+            ->sort(['date' => -1])
+            ->skip($offset)
+            ->limit(self::GROUP_LIMIT);
 
-           ->sort(['date' => -1]);
 
         return $ab->getAggregation()->getIterator();
     }
 
-    public function detail(User $sessionUser, User $otherUser)
+    public function detail(User $sessionUser, User $otherUser, $offset = 0)
     {
 
         $qb = $this->dm->createQueryBuilder(Message::class);
-        $qb->addOr(
-            $qb->expr()->addAnd(
-                $qb->expr()
-                    ->field('to')->equals($otherUser->getId())
-            )->addAnd(
-                $qb->expr()
-                    ->field('from')->equals($sessionUser->getId())
-            )
-        )
-        ->addOr(
-            $qb->expr()->addAnd(
-                $qb->expr()
-                    ->field('from')->equals($otherUser->getId())
-            )->addAnd(
+        $qb
+            ->addOr(
+                $qb->expr()->addAnd(
                     $qb->expr()
-                        ->field('to')->equals($sessionUser->getId())
+                        ->field('to')->equals($otherUser->getId())
+                )->addAnd(
+                    $qb->expr()
+                        ->field('from')->equals($sessionUser->getId())
                 )
-        );
+            )
+            ->addOr(
+                $qb->expr()->addAnd(
+                    $qb->expr()
+                        ->field('from')->equals($otherUser->getId())
+                )->addAnd(
+                        $qb->expr()
+                            ->field('to')->equals($sessionUser->getId())
+                    )
+            )
+            ->sort(['date' => -1])
+            ->skip($offset)
+            ->limit(self::DETAIL_LIMIT);
 
         return $qb->getQuery()->execute();
     }
