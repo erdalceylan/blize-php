@@ -11,7 +11,6 @@ use Symfony\Component\Serializer\Annotation\Groups;
  */
 class MessageGroupItem
 {
-    CONST LIMIT = 24;
     /**
      * @var int
      * @MongoDB\Field(type="integer")
