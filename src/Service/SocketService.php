@@ -50,6 +50,30 @@ class SocketService
             ]);
     }
 
+    public function sendCall(User $otherUser, \App\Type\Call\Item $callItem)
+    {
+        $this
+            ->emitter
+            ->to($otherUser->getUsername())
+            ->emit('call', $this->groups($callItem, ['call', 'user']));
+    }
+
+    public function sendAnswer(User $otherUser, \App\Type\Call\Item $callItem)
+    {
+        $this
+            ->emitter
+            ->to($otherUser->getUsername())
+            ->emit('accept', $this->groups($callItem, ['call', 'user']));
+    }
+
+    public function sendCallEnd(User $otherUser, \App\Type\Call\Item $callItem)
+    {
+        $this
+            ->emitter
+            ->to($otherUser->getUsername())
+            ->emit('call-end', $this->groups($callItem, ['call', 'user']));
+    }
+
     private function groups($data, $groups = [])
     {
         $jsonString = $this->serializer->serialize($data, 'json', array_merge([
