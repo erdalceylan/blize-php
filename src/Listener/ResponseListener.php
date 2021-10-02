@@ -2,13 +2,12 @@
 
 namespace App\Listener;
 
-use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class ResponseListener
 {
-    private ContainerInterface $parameterBag;
+    private ParameterBagInterface $parameterBag;
 
     public function __construct(ParameterBagInterface $parameterBag)
     {
