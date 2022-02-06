@@ -4,8 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegisterType;
-use App\Repository\UserRepository;
-use Firebase\JWT\JWT;
+use App\Service\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,12 +15,12 @@ class RegisterController extends AbstractController
     /**
      * @Route("/register", name="register")
      * @param Request $request
-     * @param UserRepository $userRepository
+     * @param UserService $userService
      * @return Response
      */
     public function index(
         Request $request,
-        UserRepository $userRepository
+        UserService $userService
     ): Response
     {
         $user = new User();
@@ -30,7 +29,7 @@ class RegisterController extends AbstractController
             ->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $userRepository->create($user);
+            $userService->create($user);
         }
 
         return $this->render('register/index.html.twig', [

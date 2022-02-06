@@ -7,7 +7,7 @@ use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
- * @MongoDB\Document(collection="messages")
+ * @MongoDB\Document(collection="message")
  */
 class Message
 {

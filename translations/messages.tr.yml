@@ -1,0 +1,3 @@
+IMAGE_SMALL_SIZE_ERROR: Resim Boyutu :size boyutundan küçük.
+IMAGE_BIG_SIZE_ERROR: Resim Boyutu :size boyutundan büyük.
+DIRECTORY_PERMISSION_ERROR: Yol oluşturma yetki hatası.

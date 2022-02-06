@@ -4,13 +4,12 @@ namespace App\Controller\Api;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\UserService;
 use Firebase\JWT\JWT;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\View\View;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -20,33 +19,17 @@ class UserController extends AbstractFOSRestController
 {
 
     /**
-     * @Route("/list", name="user_ping")
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"user"})
-     * @param UserRepository $userRepository
-     * @return View
-     */
-    public function list(UserRepository $userRepository)
-    {
-        /**@var User $user*/
-        $user = $this->getUser();
-        $user = $userRepository->updateLasSeen($user);
-
-        return View::create($user);
-    }
-
-    /**
      * @Route("/ping", name="user_ping")
      * @IsGranted("ROLE_USER")
      * @Rest\View(serializerGroups={"user"})
-     * @param UserRepository $userRepository
+     * @param UserService $userService
      * @return View
      */
-    public function ping(UserRepository $userRepository)
+    public function ping(UserService $userService)
     {
         /**@var User $user*/
         $user = $this->getUser();
-        $user = $userRepository->updateLasSeen($user);
+        $userService->updateLasSeen($user);
 
         return View::create($user);
     }

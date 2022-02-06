@@ -14,6 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User implements UserInterface
 {
     /**
+     * @var int
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
@@ -22,12 +23,14 @@ class User implements UserInterface
     private $id;
 
     /**
+     * @var string|null
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"user.email"})
      */
     private $email;
 
     /**
+     * @var string|null
      * @Assert\Regex(
      *     pattern     = "/^[a-z]+$/i",
      * )
@@ -63,6 +66,7 @@ class User implements UserInterface
     private $lastName;
 
     /**
+     * @var string|null
      * @ORM\Column(type="string", length=256, nullable=true)
      * @Groups({"user", "user.image"})
      */
@@ -76,6 +80,7 @@ class User implements UserInterface
     private $lastSeen;
 
     /**
+     * @var array
      * @ORM\Column(type="json")
      */
     private $roles = [];
@@ -90,43 +95,28 @@ class User implements UserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(string $email): User
     {
         $this->email = $email;
-
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getUsername()
+    public function getUsername(): ?string
     {
         return $this->username;
     }
 
-    /**
-     * @param mixed $username
-     * @return User
-     */
-    public function setUsername($username)
+    public function setUsername(?string $username): User
     {
         $this->username = $username;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getPassword(): string
     {
         return $this->password;
     }
 
-    /**
-     * @param string $password
-     * @return User
-     */
     public function setPassword(string $password): User
     {
         $this->password = $password;
@@ -151,61 +141,38 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @return string|null
-     */
     public function getLastName(): ?string
     {
         return $this->lastName;
     }
 
-    /**
-     * @param string|null $lastName
-     * @return User
-     */
     public function setLastName(?string $lastName): User
     {
         $this->lastName = $lastName;
         return $this;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getImage()
+    public function getImage(): ?string
     {
         return $this->image;
     }
 
-    /**
-     * @param mixed $image
-     * @return User
-     */
-    public function setImage($image)
+    public function setImage(?string $image): User
     {
         $this->image = $image;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface
-     */
     public function getLastSeen(): \DateTimeInterface
     {
         return $this->lastSeen;
     }
 
-    /**
-     * @param \DateTimeInterface $lastSeen
-     * @return User
-     */
     public function setLastSeen(\DateTimeInterface $lastSeen): User
     {
         $this->lastSeen = $lastSeen;
         return $this;
     }
-
-
 
     /**
      * @see UserInterface
@@ -219,7 +186,7 @@ class User implements UserInterface
         return array_unique($roles);
     }
 
-    public function setRoles(array $roles): self
+    public function setRoles(array $roles): User
     {
         $this->roles = $roles;
 

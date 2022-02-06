@@ -6,9 +6,6 @@
 parameters:
     env(MONGODB_URL): ''
     env(MONGODB_DB): ''
- #   rsa:
- #       private: '%env:(resolve:RSA_SECRET_KEY)%'
- #       public: '%env:(resolve:RSA_PUBLIC_KEY)%'
     container.dumper.inline_factories: true
 
 services:

@@ -48,33 +48,16 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->_em->flush();
     }
 
-    public function create(User $user)
-    {
-        $user->setRoles(['ROLE_USER']);
-        $user->setPassword($this->userPasswordEncoder->encodePassword($user, $user->getPassword()));
-        $this->_em->persist($user);
-        $this->_em->flush();
-    }
-
-    public function loadUserByUsername($username)
+    public function loadUserByUsername($username): ?User
     {
         return $this->createQueryBuilder('u')
             ->where('u.username = :username OR u.email = :email')
             ->setParameter('username', $username)
             ->setParameter('email', $username)
+            ->setMaxResults(1)
             ->getQuery()
             ->getOneOrNullResult();
     }
-
-    public function updateLasSeen(User $user)
-    {
-        /**@var User $_user*/
-        $_user = $this->_em->getReference(User::class, $user->getId());
-        $user->setlastSeen(new \DateTime());
-        $this->_em->flush();
-        return $_user;
-    }
-
 
     /**
      * @param integer[] $ids
