@@ -120,7 +120,7 @@ class FillMongoStoriesCommand extends Command
         $draw = new ImagickDraw();
 
         // watermark
-        $draw->setFont('Arial');
+        //$draw->setFont('Arial');
         $draw->setFontSize(40);
         $draw->setFillColor('white');
         $draw->setStrokeColor('black');
