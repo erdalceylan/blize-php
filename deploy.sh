@@ -1,9 +1,9 @@
 #/bin/bah
 
 git fetch
-#git reset --hard origin/master
 git checkout master
-git pull checkout master
+git reset --hard origin/master
+git pull origin master
 
 pwd=`pwd`
 
