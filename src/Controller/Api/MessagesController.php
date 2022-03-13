@@ -2,15 +2,9 @@
 
 namespace App\Controller\Api;
 
-use App\Document\Message;
-use App\Document\MessageGroupItem;
 use App\Entity\User;
-use App\Repository\UserRepository;
-use App\Service\MongoMessageService;
+use App\Service\Response\MessageResponseService;
 use App\Service\SocketService;
-use App\Type\Message\GroupItem;
-use App\Type\Message\Item;
-use Doctrine\Common\Collections\ArrayCollection;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\View\View;
@@ -25,74 +19,45 @@ class MessagesController extends AbstractFOSRestController
 {
     /**
      * @Route("/{offset}", name="messages_index")
-     * @Route("/group/{offset}", name="messages")
+     * @Route("/group-list/{offset}", name="messages")
      * @IsGranted("ROLE_USER")
      * @Rest\View(serializerGroups={"message","user"})
-     * @param MongoMessageService $mongoMessageService
-     * @param UserRepository $userRepository
+     * @param MessageResponseService $messageResponseService
      * @param int $offset
      * @return View
      */
-    public function index(
-        MongoMessageService $mongoMessageService,
-        UserRepository $userRepository,
-        $offset = 0
-    )
+    public function groupList(
+        MessageResponseService $messageResponseService,
+        int $offset = 0
+    ): View
     {
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
-        $result = new ArrayCollection($mongoMessageService->getGroups($sessionUser, $offset)->toArray());
-        $otherUserIds = $result->map(function(MessageGroupItem $item) use ($sessionUser) {
-            return $item->getTo() == $sessionUser->getId() ? $item->getFrom() : $item->getTo();
-        });
+        $response = $messageResponseService->groupList($sessionUser, $offset);
 
-        $otherUsers = new ArrayCollection($userRepository->findBy(['id' => $otherUserIds->toArray()]));
-        $groupMapped = $result->map(function(MessageGroupItem $item) use($sessionUser, $otherUsers) {
-            return GroupItem::map(
-                $item,
-                $sessionUser,
-                $otherUsers->filter(function(User $other) use($item) {
-                    return in_array($other->getId(), [$item->getTo(), $item->getFrom()]);
-                })->current()
-            );
-        });
-
-        return View::create($groupMapped);
+        return View::create($response);
     }
 
     /**
      * @Route("/detail/{user}/{offset}", name="messages_detail")
      * @IsGranted("ROLE_USER")
      * @Rest\View(serializerGroups={"message","user"})
-     * @param MongoMessageService $mongoMessageService
+     * @param MessageResponseService $messageResponseService
      * @param User $user
      * @param int $offset
      * @return View
      */
     public function detail(
-        MongoMessageService $mongoMessageService,
+        MessageResponseService $messageResponseService,
         User $user,
-        $offset = 0
-    )
+        int $offset = 0
+    ): View
     {
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
-        $result = $mongoMessageService->detail($sessionUser, $user, $offset);
+        $response = $messageResponseService->detail($sessionUser, $user, $offset);
 
-        $itemsMapped = [];
-        /**@var Message $item*/
-        foreach ($result as $item) {
-            $itemsMapped[] = Item::map(
-                $item,
-                $sessionUser,
-                $user
-            );
-        }
-
-        return View::create([
-            'messages' =>$itemsMapped,
-            'to' => $user
-        ]);
+        return View::create($response);
     }
 
     /**
@@ -102,26 +67,25 @@ class MessagesController extends AbstractFOSRestController
      * @param User $user
      * @param Request $request
      * @param SocketService $socketService
-     * @param MongoMessageService $mongoMessageService
+     * @param MessageResponseService $messageResponseService
      * @return View
      */
     public function add(
         User $user,
         Request $request,
         SocketService $socketService,
-        MongoMessageService $mongoMessageService
-    )
+        MessageResponseService $messageResponseService
+    ): View
     {
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
         $text = $request->get('text');
 
-        $message = $mongoMessageService->add($sessionUser, $user, $text);
-        $item = Item::map($message, $sessionUser, $user);
+        $response = $messageResponseService->add($sessionUser, $user, $text);
 
-        $socketService->sendMessage($user, $item);
+        $socketService->sendMessage($user, $response);
 
-        return  View::create($item);
+        return  View::create($response);
     }
 
     /**
@@ -130,18 +94,18 @@ class MessagesController extends AbstractFOSRestController
      * @Rest\View(serializerGroups={"message","user"})
      * @param User $user
      * @param SocketService $socketService
-     * @param MongoMessageService $mongoMessageService
+     * @param MessageResponseService $messageResponseService
      * @return View
      */
     public function read(
         User $user,
         SocketService $socketService,
-        MongoMessageService $mongoMessageService
-    )
+        MessageResponseService $messageResponseService
+    ): View
     {
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
-        $result = $mongoMessageService->setRead($sessionUser, $user);
+        $result = $messageResponseService->read($sessionUser, $user);
 
         $socketService->sendRead($user, $sessionUser);
 

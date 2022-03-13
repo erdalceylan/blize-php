@@ -1,16 +1,15 @@
 <?php
 
 
-namespace App\Document;
+namespace App\Document\Result;
 
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @MongoDB\QueryResultDocument()
  */
-class StoryGroupItem
+class StoryViewItem
 {
     /**
      * @var int
@@ -20,16 +19,11 @@ class StoryGroupItem
     protected $from;
 
     /**
-     * @var Story[]
-     * @MongoDB\EmbedMany(targetDocument=Story::class)
+     * @var \DateTimeInterface
+     * @MongoDB\Field(type="date")
      * @Groups({"story"})
      */
-    protected $items;
-
-    public function __construct()
-    {
-        $this->items = new ArrayCollection();
-    }
+    private $date;
 
     /**
      * @return int
@@ -41,30 +35,34 @@ class StoryGroupItem
 
     /**
      * @param int $from
-     * @return StoryGroupItem
+     * @return StoryViewItem
      */
-    public function setFrom(int $from): StoryGroupItem
+    public function setFrom(int $from): StoryViewItem
     {
         $this->from = $from;
         return $this;
     }
 
     /**
-     * @return Story[]
+     * @return \DateTimeInterface
      */
-    public function getItems()
+    public function getDate(): \DateTimeInterface
     {
-        return $this->items;
+        return $this->date;
     }
 
     /**
-     * @param Story[] $items
-     * @return StoryGroupItem
+     * @param \DateTimeInterface $date
+     * @return StoryViewItem
      */
-    public function setItems($items)
+    public function setDate(\DateTimeInterface $date): StoryViewItem
     {
-        $this->items = $items;
+        $this->date = $date;
         return $this;
     }
 
+    public function toArray()
+    {
+        return get_object_vars($this);
+    }
 }

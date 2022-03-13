@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use App\Entity\User;
-use App\Type\Message\Item;
+use App\Type\Message\MessageResponse;
 use SocketIO\Emitter;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,7 +32,7 @@ class SocketService
 
     }
 
-    public function sendMessage(User $otherUser, Item $messageItem)
+    public function sendMessage(User $otherUser, MessageResponse $messageItem)
     {
         $this
             ->emitter
@@ -50,7 +50,7 @@ class SocketService
             ]);
     }
 
-    public function sendCall(User $otherUser, \App\Type\Call\Item $callItem)
+    public function sendCall(User $otherUser, \App\Type\Call\CallResponse $callItem)
     {
         $this
             ->emitter
@@ -58,7 +58,7 @@ class SocketService
             ->emit('call', $this->groups($callItem, ['call', 'user']));
     }
 
-    public function sendAnswer(User $otherUser, \App\Type\Call\Item $callItem)
+    public function sendAnswer(User $otherUser, \App\Type\Call\CallResponse $callItem)
     {
         $this
             ->emitter
@@ -66,7 +66,7 @@ class SocketService
             ->emit('accept', $this->groups($callItem, ['call', 'user']));
     }
 
-    public function sendCallEnd(User $otherUser, \App\Type\Call\Item $callItem)
+    public function sendCallEnd(User $otherUser, \App\Type\Call\CallResponse $callItem)
     {
         $this
             ->emitter

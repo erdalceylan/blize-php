@@ -2,11 +2,11 @@
 
 namespace App\Type\Story;
 
-use App\Document\Story;
+use App\Document\Result\StoryGroupItem;
 use App\Entity\User;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-class Item
+class StoryGroupItemResponse
 {
     /**
      * @var string
@@ -43,6 +43,12 @@ class Item
      * @Groups({"story"})
      */
     private $date;
+    
+    /**
+     * @var bool
+     * @Groups({"story"})
+     */
+    private $seen;
 
     /**
      * @return string
@@ -54,9 +60,9 @@ class Item
 
     /**
      * @param string $id
-     * @return Item
+     * @return self
      */
-    public function setId(string $id): Item
+    public function setId(string $id): self
     {
         $this->id = $id;
         return $this;
@@ -71,10 +77,10 @@ class Item
     }
 
     /**
-     * @param User $from
-     * @return Item
+     * @param User $user
+     * @return self
      */
-    public function setUser(User $user): Item
+    public function setUser(User $user): self
     {
         $this->user = $user;
         return $this;
@@ -90,9 +96,9 @@ class Item
 
     /**
      * @param string $rootPath
-     * @return Item
+     * @return self
      */
-    public function setRootPath(string $rootPath): Item
+    public function setRootPath(string $rootPath): self
     {
         $this->rootPath = $rootPath;
         return $this;
@@ -108,9 +114,9 @@ class Item
 
     /**
      * @param string $path
-     * @return Item
+     * @return self
      */
-    public function setPath(string $path): Item
+    public function setPath(string $path): self
     {
         $this->path = $path;
         return $this;
@@ -126,9 +132,9 @@ class Item
 
     /**
      * @param string $fileName
-     * @return Item
+     * @return self
      */
-    public function setFileName(string $fileName): Item
+    public function setFileName(string $fileName): self
     {
         $this->fileName = $fileName;
         return $this;
@@ -144,30 +150,50 @@ class Item
 
     /**
      * @param \DateTimeInterface $date
-     * @return Item
+     * @return self
      */
-    public function setDate(\DateTimeInterface $date): Item
+    public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
     }
 
     /**
-     * @param Story $story
-     * @param User $user
-     * @return Item
+     * @return bool
      */
-    public static function map(Story $story, User $user)
+    public function isSeen(): bool
+    {
+        return $this->seen;
+    }
+
+    /**
+     * @param bool $seen
+     * @return self
+     */
+    public function setSeen(bool $seen): self
+    {
+        $this->seen = $seen;
+        return $this;
+    }
+
+    /**
+     * @param StoryGroupItem $groupItem
+     * @param User $user
+     * @return self
+     */
+    public static function fill(StoryGroupItem $groupItem, User $user)
     {
         $self = new self();
         $self
-            ->setId($story->getId())
+            ->setId($groupItem->getId())
             ->setUser($user)
-            ->setRootPath($story->getRootPath())
-            ->setPath($story->getPath())
-            ->setFileName($story->getFileName())
-            ->setDate($story->getDate());
+            ->setRootPath($groupItem->getRootPath())
+            ->setPath($groupItem->getPath())
+            ->setFileName($groupItem->getFileName())
+            ->setDate($groupItem->getDate())
+            ->setSeen($groupItem->getSeen());
 
         return $self;
     }
+
 }

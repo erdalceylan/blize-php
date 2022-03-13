@@ -8,7 +8,7 @@ use App\Document\Call;
 use App\Entity\User;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-class Item
+class CallResponse
 {
     /**
      * @var string
@@ -61,9 +61,9 @@ class Item
 
     /**
      * @param string $id
-     * @return Item
+     * @return CallResponse
      */
-    public function setId(string $id): Item
+    public function setId(string $id): CallResponse
     {
         $this->id = $id;
         return $this;
@@ -79,9 +79,9 @@ class Item
 
     /**
      * @param User $from
-     * @return Item
+     * @return CallResponse
      */
-    public function setFrom(User $from): Item
+    public function setFrom(User $from): CallResponse
     {
         $this->from = $from;
         return $this;
@@ -97,9 +97,9 @@ class Item
 
     /**
      * @param User $to
-     * @return Item
+     * @return CallResponse
      */
-    public function setTo(User $to): Item
+    public function setTo(User $to): CallResponse
     {
         $this->to = $to;
         return $this;
@@ -115,9 +115,9 @@ class Item
 
     /**
      * @param bool $video
-     * @return Item
+     * @return CallResponse
      */
-    public function setVideo(bool $video): Item
+    public function setVideo(bool $video): CallResponse
     {
         $this->video = $video;
         return $this;
@@ -133,9 +133,9 @@ class Item
 
     /**
      * @param \DateTimeInterface $date
-     * @return Item
+     * @return CallResponse
      */
-    public function setDate(\DateTimeInterface $date): Item
+    public function setDate(\DateTimeInterface $date): CallResponse
     {
         $this->date = $date;
         return $this;
@@ -151,9 +151,9 @@ class Item
 
     /**
      * @param \DateTimeInterface|null $startDate
-     * @return Item
+     * @return CallResponse
      */
-    public function setStartDate(?\DateTimeInterface $startDate): Item
+    public function setStartDate(?\DateTimeInterface $startDate): CallResponse
     {
         $this->startDate = $startDate;
         return $this;
@@ -169,9 +169,9 @@ class Item
 
     /**
      * @param \DateTimeInterface|null $endDate
-     * @return Item
+     * @return CallResponse
      */
-    public function setEndDate(?\DateTimeInterface $endDate): Item
+    public function setEndDate(?\DateTimeInterface $endDate): CallResponse
     {
         $this->endDate = $endDate;
         return $this;
@@ -181,9 +181,9 @@ class Item
      * @param Call $call
      * @param User $sessionUser
      * @param User $otherUser
-     * @return Item
+     * @return CallResponse
      */
-    public static function map(Call $call, User $sessionUser, User $otherUser)
+    public static function fill(Call $call, User $sessionUser, User $otherUser)
     {
         $self = new self();
         $self

@@ -17,17 +17,22 @@ class SearchController extends AbstractFOSRestController
 {
 
     /**
-     * @Route("", name="search")
+     * @Route("/list/{offset}", name="search_list")
+     * @Route("/{offset}", name="search")
      * @IsGranted("ROLE_USER")
      * @Rest\View(serializerGroups={"user"})
      * @param UserRepository $userRepository
+     * @param int $offset
      * @return View
      */
-    public function index(UserRepository $userRepository)
+    public function index(
+        UserRepository $userRepository,
+        int $offset = 0
+    )
     {
         /**@var User $user*/
         $user = $this->getUser();
-        $user = $userRepository->findAllExclude([$user->getId()]);
+        $user = $userRepository->findAllExclude([$user->getId()], $offset);
 
         return View::create($user);
     }

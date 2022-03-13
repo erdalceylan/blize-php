@@ -4,11 +4,11 @@
 namespace App\Type\Message;
 
 
-use App\Document\MessageGroupItem;
+use App\Document\Result\MessageGroupItem;
 use App\Entity\User;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-class GroupItem
+class MessageGroupItemResponse
 {
     /**
      * @var User|null
@@ -56,9 +56,9 @@ class GroupItem
 
     /**
      * @param User|null $from
-     * @return GroupItem
+     * @return self
      */
-    public function setFrom(?User $from): GroupItem
+    public function setFrom(?User $from): self
     {
         $this->from = $from;
         return $this;
@@ -74,9 +74,9 @@ class GroupItem
 
     /**
      * @param User|null $to
-     * @return GroupItem
+     * @return self
      */
-    public function setTo(?User $to): GroupItem
+    public function setTo(?User $to): self
     {
         $this->to = $to;
         return $this;
@@ -92,9 +92,9 @@ class GroupItem
 
     /**
      * @param string $text
-     * @return GroupItem
+     * @return self
      */
-    public function setText(string $text): GroupItem
+    public function setText(string $text): self
     {
         $this->text = $text;
         return $this;
@@ -110,9 +110,9 @@ class GroupItem
 
     /**
      * @param \DateTimeInterface $date
-     * @return GroupItem
+     * @return self
      */
-    public function setDate(\DateTimeInterface $date): GroupItem
+    public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
@@ -128,9 +128,9 @@ class GroupItem
 
     /**
      * @param bool $read
-     * @return GroupItem
+     * @return self
      */
-    public function setRead(bool $read): GroupItem
+    public function setRead(bool $read): self
     {
         $this->read = $read;
         return $this;
@@ -146,9 +146,9 @@ class GroupItem
 
     /**
      * @param int|null $unReadCount
-     * @return GroupItem
+     * @return self
      */
-    public function setUnReadCount(?int $unReadCount): GroupItem
+    public function setUnReadCount(?int $unReadCount): self
     {
         $this->unReadCount = $unReadCount;
         return $this;
@@ -159,9 +159,9 @@ class GroupItem
      * @param MessageGroupItem $result
      * @param User $sessionUser
      * @param User|null $otherUser
-     * @return GroupItem
+     * @return self
      */
-    public static function map(MessageGroupItem $result, User $sessionUser, ?User $otherUser)
+    public static function fill(MessageGroupItem $result, User $sessionUser, ?User $otherUser)
     {
         $self = new self();
         $self

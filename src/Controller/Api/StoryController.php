@@ -2,13 +2,9 @@
 
 namespace App\Controller\Api;
 
-use App\Document\StoryGroupItem;
 use App\Entity\User;
-use App\Repository\UserRepository;
 use App\Service\MongoStoryService;
-use App\Type\Story\GroupItem;
-use App\Type\Story\Item;
-use Doctrine\Common\Collections\ArrayCollection;
+use App\Service\Response\StoryResponseService;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
@@ -24,40 +20,63 @@ class StoryController extends AbstractFOSRestController
 {
 
     /**
-     * @Route("/list/{offset}", name="story_list", methods={"GET"})
+     * @Route("/group-list/{offset}", name="story_list", methods={"GET"})
      * @IsGranted("ROLE_USER")
      * @Rest\View(serializerGroups={"story","user"})
-     * @param UserRepository $userRepository
+     * @param StoryResponseService $storyResponseService
+     * @param int $offset
      * @return View
      */
-    public function list(
-        UserRepository $userRepository,
-        MongoStoryService $mongoStoryService,
-        $offset = 0
-    )
+    public function groupList(
+        StoryResponseService $storyResponseService,
+        int $offset = 0
+    ): View
     {
-
-
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
-        $result = new ArrayCollection($mongoStoryService->getGroups($sessionUser, $offset)->toArray());
+        $response = $storyResponseService->groupList($sessionUser, $offset);
 
-        $userIds = $result->map(function(StoryGroupItem $item) {
-            return $item->getFrom();
-        });
+        return  View::create($response);
+    }
 
-        $users = new ArrayCollection($userRepository->findBy(['id' => $userIds->toArray()]));
+    /**
+     * @Route("/me-list", name="story_me", methods={"GET"})
+     * @IsGranted("ROLE_USER")
+     * @Rest\View(serializerGroups={"story","user"})
+     * @param StoryResponseService $storyResponseService
+     * @return View
+     */
+    public function meList(
+        StoryResponseService $storyResponseService
+    ): View
+    {
+        /**@var User $sessionUser*/
+        $sessionUser = $this->getUser();
+        $response = $storyResponseService->meList($sessionUser);
 
-        $groupMapped = $result->map(function(StoryGroupItem $groupItem) use($users) {
-            return GroupItem::map(
-                $groupItem,
-                $users->filter(function (User $user) use($groupItem) {
-                    return $user->getId() == $groupItem->getFrom();
-                })->current()
-            );
-        });
+        return  View::create($response);
+    }
 
-        return  View::create($groupMapped);
+    /**
+     * @Route("/view-list/{_id}/{offset}", name="story_views", methods={"GET"})
+     * @IsGranted("ROLE_USER")
+     * @Rest\View(serializerGroups={"story","user"})
+     * @param StoryResponseService $storyResponseService
+     * @param string $_id
+     * @param int $offset
+     * @return View
+     */
+    public function viewList(
+        StoryResponseService $storyResponseService,
+        string $_id,
+        int $offset
+    ): View
+    {
+        /**@var User $sessionUser*/
+        $sessionUser = $this->getUser();
+        $response = $storyResponseService->viewList($sessionUser, $_id, $offset);
+
+        return  View::create($response);
     }
 
     /**
@@ -65,42 +84,59 @@ class StoryController extends AbstractFOSRestController
      * @IsGranted("ROLE_USER")
      * @Rest\View(serializerGroups={"story","user"})
      * @Rest\FileParam(name="image", image=true)
+     * @param ParamFetcherInterface $paramFetcher
+     * @param StoryResponseService $storyResponseService
      * @return View
      */
     public function add(
         ParamFetcherInterface $paramFetcher,
-        MongoStoryService $mongoStoryService
-    )
+        StoryResponseService $storyResponseService
+    ): View
     {
-
         /**@var $image UploadedFile*/
         $image = $paramFetcher->get("image");
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
+        $response = $storyResponseService->add($sessionUser, $image);
 
-        $story = $mongoStoryService->add($sessionUser, $image->getRealPath());
-
-        return  View::create(Item::map($story, $sessionUser));
+        return  View::create($response);
     }
 
     /**
      * @Route("/seen/{_id}", name="story_seen", methods={"GET"})
      * @IsGranted("ROLE_USER")
+     * @param StoryResponseService $storyResponseService
+     * @param string $_id
      * @return View
      */
     public function seen(
+        StoryResponseService $storyResponseService,
+        string $_id
+    ): View
+    {
+        /**@var User $sessionUser*/
+        $sessionUser = $this->getUser();
+        $response = $storyResponseService->seen($sessionUser, $_id);
+
+        return  View::create($response);
+    }
+
+    /**
+     * @Route("/delete/{_id}", name="story_delete", methods={"GET"})
+     * @IsGranted("ROLE_USER")
+     * @return View
+     */
+    public function delete(
         MongoStoryService $mongoStoryService,
         string $_id
     )
     {
-
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
 
-        $result = $mongoStoryService->seen($sessionUser, $_id);
+        $result = $mongoStoryService->delete($sessionUser, $_id);
 
         return  View::create($result);
     }
-
 
 }

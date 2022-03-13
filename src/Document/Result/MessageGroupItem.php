@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Document;
+namespace App\Document\Result;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;

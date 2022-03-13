@@ -2,17 +2,25 @@
 
 namespace App\Service;
 
+use App\Document\Result\StoryGroup;
+use App\Document\Result\StoryMeItem;
+use App\Document\Result\StoryViewItem;
 use App\Document\Story;
-use App\Document\StoryGroupItem;
-use App\Document\StoryViewItem;
 use App\Entity\User;
 use App\Type\Image\Uploaded;
 use Doctrine\ODM\MongoDB\DocumentManager;
+use Doctrine\ODM\MongoDB\Iterator\HydratingIterator;
+use Doctrine\ODM\MongoDB\Iterator\UnrewindableIterator;
+use MongoDB\BSON\ObjectId;
+use MongoDB\BSON\UTCDateTime;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class MongoStoryService
 {
     CONST GROUP_LIMIT = 24;
+    CONST USER_ITEM_LIMIT = 10;
+    CONST USER_ITEM_VIEWS_LIMIT = 24;
+    CONST USER_ITEM_VISIBLE_SECOND = 24*60*60;
     /**
      * @var DocumentManager
      */
@@ -31,16 +39,20 @@ class MongoStoryService
         $this->imageUploadService = $imageUploadService;
     }
 
-    public function getGroups(User $user, $offset = 0)
+    public function groupList(User $user, $offset = 0)
     {
         $ab = $this->dm->createAggregationBuilder(Story::class);
         $ab
             ->rewindable(false)
-            ->hydrate(StoryGroupItem::class)
+            ->hydrate(StoryGroup::class)
             ->match()
             ->addAnd(
                 $ab->matchExpr()
-                    ->field('from')->notEqual($user->getId())
+                    ->field('from')->notEqual($user->getId()),
+                $ab->matchExpr()
+                    ->field('date')->gte(new \DateTime("-".self::USER_ITEM_VISIBLE_SECOND." second")),
+                $ab->matchExpr()
+                    ->field('deletedAt')->exists(false)
             )
             ->group()
             ->field("id")
@@ -58,7 +70,22 @@ class MongoStoryService
                 ->expression('$path')
                 ->field('rootPath')
                 ->expression('$rootPath')
-            );
+                ->field('seen')
+                ->expression(
+                    $ab->expr()->cond(
+                        $ab->expr()->addAnd(
+                            $ab->expr()->isArray(
+                                '$views.from'
+                            ),
+                            $ab->expr()->in( $user->getId(), '$views.from')
+                        ),
+                        true,
+                        false
+                    )
+                )
+            )
+        ->sort(['date' => -1]);
+        
         $ab
             ->group()
             ->field("id")
@@ -86,22 +113,110 @@ class MongoStoryService
                     ->expression('$id.path')
                     ->field('rootPath')
                     ->expression('$id.rootPath')
+                    ->field('seen')
+                    ->expression('$id.seen')
                 )
             );
 
         return $ab
-            ->sort(["items.date" => 1])
+            ->sort(["items.date" => -1])
             ->skip($offset)
             ->limit(self::GROUP_LIMIT)
             ->getAggregation()
             ->getIterator();
     }
 
-    public function add(User $user, $imagePath): Story
+    public function meList(User $user)
     {
-        $file = $this->uploadImage($imagePath);
+        $query = [
+            'from' => $user->getId(),
+            'date' => [
+                '$gte' => new UTCDateTime(new \DateTime("-".self::USER_ITEM_VISIBLE_SECOND." second"))
+            ],
+            'deletedAt' => ['$exists' => false]
+        ];
 
-        return $this->insert($user, $file);
+        $options = [
+            'projection' => [
+                'from' => 1,
+                'date' => 1,
+                'fileName' => 1,
+                'path' => 1,
+                'rootPath' => 1,
+                'views' => ['$cond' => [
+                    ['$isArray' => '$views'],
+                    ['$slice' => ['$views', 0, 3]],
+                    []
+                ]],
+                'viewsLength' => ['$cond' => [
+                    ['$isArray' => '$views'],
+                    ['$size' => '$views'],
+                    0
+                ]]
+            ],
+            'sort' =>['date' => -1],
+            'limit' => self::USER_ITEM_LIMIT
+        ];
+
+        $cursor =  $this->dm->getDocumentCollection(Story::class)->find($query, $options);
+        $hydrationClass = $this->dm->getClassMetadata(StoryMeItem::class);
+        $cursor = new HydratingIterator($cursor, $this->dm->getUnitOfWork(), $hydrationClass);
+        return new UnrewindableIterator($cursor);
+    }
+
+    public function viewList(User $user, string $_id, $offset = 0)
+    {
+        $query = [
+            '_id' => new ObjectId($_id),
+            'from' => $user->getId(),
+            'deletedAt' => ['$exists' => false]
+        ];
+
+        $options = [
+            'projection' => [
+                'views' => ['$cond' => [
+                    ['$isArray' => '$views'],
+                    ['$slice' => ['$views', (int)$offset, self::USER_ITEM_VIEWS_LIMIT]],
+                    []
+                ]]
+            ],
+            'limit' => 1
+        ];
+
+        $rawStoryItem =  $this->dm->getDocumentCollection(Story::class)->findOne($query, $options);
+
+        /**@var StoryViewItem[] $views*/
+        $views = [];
+
+        if($rawStoryItem) {
+            foreach ($rawStoryItem['views'] as $rawView){
+                $view = new StoryViewItem();
+                $view->setFrom($rawView['from']);
+                $view->setDate($rawView['date']->toDateTime());
+
+                $views[] = $view;
+            }
+        }
+
+        return $views;
+    }
+
+    public function add(User $user, $imagePath): ?Story
+    {
+        $count = $this->dm->createQueryBuilder(Story::class)
+            ->field('from')->equals($user->getId())
+            ->field('date')->gte(new \DateTime("-".self::USER_ITEM_VISIBLE_SECOND." second"))
+            ->count()
+            ->getQuery()->execute();
+
+        if ($count < self::USER_ITEM_LIMIT) {
+
+            $file = $this->uploadImage($imagePath);
+
+            return $this->insert($user, $file);
+        }
+
+        return null;
     }
 
     public function insert(User $user, Uploaded $file): Story
@@ -126,11 +241,30 @@ class MongoStoryService
             ->setFrom($user->getId())
             ->setDate(new \DateTime());
 
-        return $this->dm->createQueryBuilder(Story::class)
-            ->updateOne()
+        $qb =  $this->dm->createQueryBuilder(Story::class);
+        return $qb->updateOne()
+            ->setRewindable(false)
             ->field('id')->equals($_id)
             ->field('views.from')->notEqual($user->getId())
-            ->field('views')->push($viewItem->toArray())
+            ->field('views')->push(
+                $qb->expr()
+                    ->each([$viewItem->toArray()])
+                    ->position(0)
+            )
+            ->getQuery()
+            ->execute();
+    }
+
+
+    public function delete(User $user, $_id)
+    {
+        $qb =  $this->dm->createQueryBuilder(Story::class);
+        return $qb->updateOne()
+            ->setRewindable(false)
+            ->field('id')->equals($_id)
+            ->field('from')->equals($user->getId())
+            ->field('deletedAt')->exists(false)
+            ->field('deletedAt')->set(new \DateTime())
             ->getQuery()
             ->execute();
     }

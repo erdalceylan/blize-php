@@ -19,6 +19,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
+    const LIST_LIMIT = 24;
     /**
      * @var UserPasswordEncoder UserPasswordEncoder
      */
@@ -63,11 +64,14 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
      * @param integer[] $ids
      * @return User[]
      */
-    public function findAllExclude(array $ids)
+    public function findAllExclude(array $ids, int $offset)
     {
         return $this->createQueryBuilder('u')
             ->where('u.id not in (:ids)')
             ->setParameter('ids', $ids)
+            ->orderBy('u.id', 'ASC')
+            ->setMaxResults(self::LIST_LIMIT)
+            ->setFirstResult($offset)
             ->getQuery()
             ->getResult();
     }

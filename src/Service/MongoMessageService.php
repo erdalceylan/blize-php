@@ -5,7 +5,7 @@ namespace App\Service;
 
 
 use App\Document\Message;
-use App\Document\MessageGroupItem;
+use App\Document\Result\MessageGroupItem;
 use App\Entity\User;
 use Doctrine\ODM\MongoDB\DocumentManager;
 
@@ -40,7 +40,7 @@ class MongoMessageService
         return $message;
     }
 
-    public function getGroups(User $sessionUser, $offset = 0)
+    public function groupList(User $sessionUser, $offset = 0)
     {
         $ab = $this->dm->createAggregationBuilder(Message::class);
         $ab
@@ -118,7 +118,7 @@ class MongoMessageService
         return $qb->getQuery()->execute();
     }
 
-    public function setRead(User $sessionUser, User $otherUser)
+    public function read(User $sessionUser, User $otherUser)
     {
         return $this->dm->createQueryBuilder(Message::class)
             ->updateMany()

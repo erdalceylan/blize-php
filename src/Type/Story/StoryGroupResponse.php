@@ -4,11 +4,11 @@
 namespace App\Type\Story;
 
 
-use App\Document\StoryGroupItem;
+use App\Document\Result\StoryGroup;
 use App\Entity\User;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-class GroupItem
+class StoryGroupResponse
 {
     /**
      * @var User|null
@@ -17,7 +17,7 @@ class GroupItem
     private $user;
 
     /**
-     * @var Item[]
+     * @var StoryGroupItemResponse[]
      * @Groups({"story"})
      */
     private $items;
@@ -32,16 +32,17 @@ class GroupItem
 
     /**
      * @param User|null $user
-     * @return GroupItem
+     * @return self
+
      */
-    public function setUser(?User $user): GroupItem
+    public function setUser(?User $user): self
     {
         $this->user = $user;
         return $this;
     }
 
     /**
-     * @return Item[]
+     * @return self[]
      */
     public function getItems(): array
     {
@@ -49,37 +50,38 @@ class GroupItem
     }
 
     /**
-     * @param Item[] $items
-     * @return GroupItem
+     * @param StoryGroupResponse[] $items
+     * @return self
      */
     public function setItems(array $items): self
     {
         $this->items = $items;
         return $this;
     }
+
     /**
-     * @param Item $items
-     * @return GroupItem
+     * @param StoryGroupItemResponse $item
+     * @return self
      */
-    public function addItems(Item $item): self
+    public function addItems(StoryGroupItemResponse $item): self
     {
         $this->items[] = $item;
         return $this;
     }
 
     /**
-     * @param StoryGroupItem $groupItem
+     * @param StoryGroup $groupItem
      * @param User $user
-     * @return GroupItem
+     * @return self
      */
-    public static function map(StoryGroupItem $groupItem, User $user)
+    public static function fill(StoryGroup $groupItem, User $user)
     {
         $self = new self();
         $self->setUser($user);
 
         foreach ($groupItem->getItems() as $item) {
 
-            $tItem = Item::map($item, $user);
+            $tItem = StoryGroupItemResponse::fill($item, $user);
 
             $self->addItems($tItem);
         }

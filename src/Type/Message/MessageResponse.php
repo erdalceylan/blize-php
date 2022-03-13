@@ -8,7 +8,7 @@ use App\Document\Message;
 use App\Entity\User;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-class Item
+class MessageResponse
 {
     /**
      * @var string
@@ -56,9 +56,9 @@ class Item
 
     /**
      * @param string $id
-     * @return Item
+     * @return self
      */
-    public function setId(string $id): Item
+    public function setId(string $id): self
     {
         $this->id = $id;
         return $this;
@@ -74,9 +74,9 @@ class Item
 
     /**
      * @param User $from
-     * @return Item
+     * @return self
      */
-    public function setFrom(User $from): Item
+    public function setFrom(User $from): self
     {
         $this->from = $from;
         return $this;
@@ -92,9 +92,9 @@ class Item
 
     /**
      * @param User $to
-     * @return Item
+     * @return self
      */
-    public function setTo(User $to): Item
+    public function setTo(User $to): self
     {
         $this->to = $to;
         return $this;
@@ -110,9 +110,9 @@ class Item
 
     /**
      * @param string $text
-     * @return Item
+     * @return self
      */
-    public function setText(string $text): Item
+    public function setText(string $text): self
     {
         $this->text = $text;
         return $this;
@@ -128,9 +128,9 @@ class Item
 
     /**
      * @param \DateTimeInterface $date
-     * @return Item
+     * @return self
      */
-    public function setDate(\DateTimeInterface $date): Item
+    public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
@@ -146,9 +146,9 @@ class Item
 
     /**
      * @param bool $read
-     * @return Item
+     * @return self
      */
-    public function setRead(bool $read): Item
+    public function setRead(bool $read): self
     {
         $this->read = $read;
         return $this;
@@ -158,9 +158,9 @@ class Item
      * @param Message $message
      * @param User $sessionUser
      * @param User $otherUser
-     * @return Item
+     * @return self
      */
-    public static function map(Message $message, User $sessionUser, User $otherUser)
+    public static function fill(Message $message, User $sessionUser, User $otherUser)
     {
         $self = new self();
         $self

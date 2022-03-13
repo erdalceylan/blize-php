@@ -6,7 +6,7 @@ use App\Document\Call;
 use App\Entity\User;
 use App\Service\MongoCallService;
 use App\Service\SocketService;
-use App\Type\Call\Item;
+use App\Type\Call\CallResponse;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\View\View;
@@ -41,7 +41,7 @@ class CallController extends AbstractFOSRestController
         /**@var User $sessionUser*/
         $sessionUser = $this->getUser();
         $call = $mongoCallService->call($sessionUser, $user, !!$request->get("video"));
-        $item = Item::map($call, $sessionUser, $user);
+        $item = CallResponse::fill($call, $sessionUser, $user);
 
         $socketService->sendCall($user, $item);
 
@@ -70,7 +70,7 @@ class CallController extends AbstractFOSRestController
 
         /**@var Call $result*/
         $result = $mongoCallService->accept($sessionUser, $id);
-        $item = Item::map($result, $sessionUser, $user);
+        $item = CallResponse::fill($result, $sessionUser, $user);
 
         $socketService->sendAnswer($user, $item);
 
@@ -99,7 +99,7 @@ class CallController extends AbstractFOSRestController
 
         /**@var Call $result*/
         $result = $mongoCallService->close($sessionUser, $user, $id);
-        $item = Item::map($result, $sessionUser, $user);
+        $item = CallResponse::fill($result, $sessionUser, $user);
 
         $socketService->sendCallEnd($user, $item);
 
