@@ -22,4 +22,5 @@ parameters:
     socket_redis_host: '%env(SOCKET_REDIS_HOST)%'
     socket_redis_port: '%env(SOCKET_REDIS_PORT)%'
     uploaded_images_path: '%env(UPLOADED_IMAGES_PATH)%'
+    socket_connection_url: '%env(SOCKET_CONNECTION_URL)%'
 
