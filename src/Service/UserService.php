@@ -7,6 +7,7 @@ use App\Repository\UserRepository;
 use App\Type\Image\Uploaded;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserService
 {
@@ -14,18 +15,21 @@ class UserService
     private UserRepository $userRepository;
     private ImageUploadService $imageUploadService;
     private ParameterBagInterface $parameterBag;
+    private UserPasswordEncoderInterface $userPasswordEncoder;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         UserRepository $userRepository,
         ImageUploadService $imageUploadService,
-        ParameterBagInterface $parameterBag
+        ParameterBagInterface $parameterBag,
+        UserPasswordEncoderInterface $userPasswordEncoder
     )
     {
         $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
         $this->imageUploadService = $imageUploadService;
         $this->parameterBag = $parameterBag;
+        $this->userPasswordEncoder = $userPasswordEncoder;
     }
 
     public function create(User $user)
