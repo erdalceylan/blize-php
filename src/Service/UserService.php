@@ -36,6 +36,7 @@ class UserService
     {
         $user->setRoles(['ROLE_USER']);
         $user->setPassword($this->userPasswordEncoder->encodePassword($user, $user->getPassword()));
+        $user->setLastSeen(new \DateTime());
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }
