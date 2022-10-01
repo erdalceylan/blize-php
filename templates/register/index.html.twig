@@ -13,7 +13,7 @@
                 <div class="text-center mb-10">
                     <h1 class="font-bold text-4xl tracking-tight">REGISTER</h1>
                     <p>Enter your information to register</p>
-                    <span class="text-sm">or <a href="/login" class="text-blue-500"> login with account</a>
+                    <span class="text-sm">or <a href="/login" class="text-blue-500"> login with account</a></span>
                 </div>
                 <form method="post" autocomplete="off">
                     <div class="flex -mx-3">
@@ -23,6 +23,7 @@
                                 <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
                                 {{ form_widget(registerForm.firstName, {'attr': {'placeholder':'John','class': 'w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500'}}) }}
                             </div>
+                            <span class="flex items-center font-medium tracking-wide text-red-500 text-xs mt-1 ml-1">{{ form_errors(registerForm.firstName) }}</span>
                         </div>
                         <div class="w-1/2 px-3 mb-5">
                             <label for="" class="text-xs font-semibold px-1">Last name</label>
@@ -30,6 +31,7 @@
                                 <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-outline text-gray-400 text-lg"></i></div>
                                 {{ form_widget(registerForm.lastName, {'attr': {'placeholder':'Smith','class': 'w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500'}}) }}
                             </div>
+                            <span class="flex items-center font-medium tracking-wide text-red-500 text-xs mt-1 ml-1">{{ form_errors(registerForm.lastName) }}</span>
                         </div>
                     </div>
                     <div class="flex -mx-3">
@@ -39,6 +41,7 @@
                                 <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-account-circle-outline text-gray-400 text-lg"></i></div>
                                 {{ form_widget(registerForm.username, {'attr': {'placeholder':'johnsmith','class': 'w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500'}}) }}
                             </div>
+                            <span class="flex items-center font-medium tracking-wide text-red-500 text-xs mt-1 ml-1">{{ form_errors(registerForm.username) }}</span>
                         </div>
                     </div>
                 <div class="flex -mx-3">
@@ -48,6 +51,7 @@
                             <div class="w-10 z-10 pl-1 text-center pointer-events-none flex items-center justify-center"><i class="mdi mdi-email-outline text-gray-400 text-lg"></i></div>
                             {{ form_widget(registerForm.email, {'attr': {'placeholder':'johnsmith@example.com','class': 'w-full -ml-10 pl-10 pr-3 py-2 rounded-lg border-2 border-gray-200 outline-none focus:border-indigo-500'}}) }}
                         </div>
+                        <span class="flex items-center font-medium tracking-wide text-red-500 text-xs mt-1 ml-1">{{ form_errors(registerForm.email) }}</span>
                     </div>
                 </div>
                     <div class="flex -mx-3">
