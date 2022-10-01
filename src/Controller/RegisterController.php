@@ -4,11 +4,13 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegisterType;
+use App\Security\LoginFormAuthenticator;
 use App\Service\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
 
 class RegisterController extends AbstractController
 {
@@ -20,7 +22,9 @@ class RegisterController extends AbstractController
      */
     public function index(
         Request $request,
-        UserService $userService
+        UserService $userService,
+        GuardAuthenticatorHandler $guardAuthenticatorHandler,
+        LoginFormAuthenticator $loginFormAuthenticator
     ): Response
     {
         $user = new User();
@@ -30,6 +34,8 @@ class RegisterController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $userService->create($user);
+            return $guardAuthenticatorHandler
+                ->authenticateUserAndHandleSuccess($user, $request, $loginFormAuthenticator, 'main');
         }
 
         return $this->render('register/index.html.twig', [
