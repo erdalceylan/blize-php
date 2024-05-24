@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  blize-php:
+    build:
+      context: ./docker/php
+      dockerfile: Dockerfile
+    container_name: "blize-php"
+    networks:
+      - blize-network
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      - blize_php-mysql
+
+  blize-php_nginx:
+    image: nginx:latest
+    container_name: "blize-php_nginx"
+    volumes:
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - .:/var/www/html
+    networks:
+      - blize-network
+    ports:
+      - "8081:8081"
+    depends_on:
+      - blize-php
+
+  blize-php_redis:
+    image: redis:latest
+    container_name: "blize-php_redis"
+    ports:
+      - "6379:6379"
+    networks:
+      - blize-network
+
+  blize-php_mongo:
+    image: mongo:latest
+    container_name: "blize-php_mongo"
+    ports:
+      - "27017:27017"
+    networks:
+      - blize-network
+
+  blize_php-mysql:
+    image: mysql:latest
+    container_name: "blize_php-mysql"
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=blize
+      - MYSQL_USER=blize
+      - MYSQL_PASSWORD=blize
+    networks:
+      - blize-network
+
+networks:
+  blize-network:
+    external: true
