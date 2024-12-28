@@ -1,70 +1,46 @@
 <?php
 
-
 namespace App\Document\Result;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-/**
- * @MongoDB\QueryResultDocument()
- */
+#[MongoDB\QueryResultDocument]
 class StoryGroup
 {
-    /**
-     * @var int
-     * @MongoDB\Field(type="integer")
-     * @Groups({"story"})
-     */
-    protected $from;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["story"])]
+    private int $from;
 
-    /**
-     * @var StoryGroupItem[]
-     * @MongoDB\EmbedMany(targetDocument=StoryGroupItem::class)
-     * @Groups({"story"})
-     */
-    protected $items;
+    #[MongoDB\EmbedMany(targetDocument: StoryGroupItem::class)]
+    #[Groups(["story"])]
+    private ArrayCollection $items;
 
     public function __construct()
     {
         $this->items = new ArrayCollection();
     }
 
-    /**
-     * @return int
-     */
     public function getFrom(): int
     {
         return $this->from;
     }
 
-    /**
-     * @param int $from
-     * @return StoryGroup
-     */
-    public function setFrom(int $from): StoryGroup
+    public function setFrom(int $from): self
     {
         $this->from = $from;
         return $this;
     }
 
-    /**
-     * @return StoryGroupItem[]
-     */
-    public function getItems()
+    public function getItems(): ArrayCollection
     {
         return $this->items;
     }
 
-    /**
-     * @param StoryGroupItem[] $items
-     * @return StoryGroup
-     */
-    public function setItems($items)
+    public function setItems(ArrayCollection $items): self
     {
         $this->items = $items;
         return $this;
     }
-
 }

@@ -2,39 +2,30 @@
 
 namespace App\Controller\Api;
 
-use App\Document\Call;
+use App\Controller\AbstractRestController;
 use App\Entity\User;
 use App\Service\MongoCallService;
 use App\Service\SocketService;
 use App\Type\Call\CallResponse;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
-use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\View\View;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * @Route("/call")
- */
-class CallController extends AbstractFOSRestController
+
+#[Route(path: '/call')]
+class CallController extends AbstractRestController
 {
 
-    /**
-     * @Route("/call/{user}", name="call_call", methods={"POST"})
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"call","user"})
-     * @param User $user
-     * @param SocketService $socketService
-     * @param MongoCallService $mongoCallService
-     * @return View
-     */
+
+    #[Route(path: '/call/{user}', name: 'call_call', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function call(
         User $user,
         SocketService $socketService,
         MongoCallService $mongoCallService,
         Request $request
-    )
+    ): JsonResponse
     {
 
         $this->getUser();
@@ -44,66 +35,46 @@ class CallController extends AbstractFOSRestController
         $item = CallResponse::fill($call, $sessionUser, $user);
 
         $socketService->sendCall($user, $item);
+        return $this->json($item, context: ['groups' => ["call","user"]]);
 
-        return  View::create($item);
     }
 
-    /**
-     * @Route("/accept/{user}/{id}", name="call_answer", methods={"GET"})
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"call","user"})
-     * @param string $id
-     * @param User $user
-     * @param SocketService $socketService
-     * @param MongoCallService $mongoCallService
-     * @return View
-     */
+    #[Route(path: '/accept/{user}/{id}', name: 'call_answer', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function accept(
         User $user,
         string $id,
         SocketService $socketService,
         MongoCallService $mongoCallService
-    )
-    {
-        /**@var User $sessionUser*/
+    ): JsonResponse {
+        /** @var User $sessionUser */
         $sessionUser = $this->getUser();
 
-        /**@var Call $result*/
         $result = $mongoCallService->accept($sessionUser, $id);
         $item = CallResponse::fill($result, $sessionUser, $user);
 
         $socketService->sendAnswer($user, $item);
 
-        return View::create($item);
+        return $this->json($item, context: ['groups' => ["call", "user"]]);
     }
 
-    /**
-     * @Route("/close/{user}/{id}", name="call_close", methods={"GET"})
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"call","user"})
-     * @param string $id
-     * @param User $user
-     * @param SocketService $socketService
-     * @param MongoCallService $mongoCallService
-     * @return View
-     */
+    #[Route(path: '/close/{user}/{id}', name: 'call_close', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function close(
         User $user,
         string $id,
         SocketService $socketService,
         MongoCallService $mongoCallService
-    )
-    {
-        /**@var User $sessionUser*/
+    ): JsonResponse {
+        /** @var User $sessionUser */
         $sessionUser = $this->getUser();
 
-        /**@var Call $result*/
         $result = $mongoCallService->close($sessionUser, $user, $id);
         $item = CallResponse::fill($result, $sessionUser, $user);
 
         $socketService->sendCallEnd($user, $item);
 
-        return View::create($item);
+        return $this->json($item, context: ['groups' => ["call", "user"]]);
     }
 
 }

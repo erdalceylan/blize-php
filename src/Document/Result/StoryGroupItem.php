@@ -1,188 +1,116 @@
 <?php
 
-
 namespace App\Document\Result;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;
+use DateTimeInterface;
 
-/**
- * @MongoDB\QueryResultDocument()
- */
+#[MongoDB\QueryResultDocument]
 class StoryGroupItem
 {
-    /**
-     * @MongoDB\Id
-     * @Groups({"story"})
-     */
-    protected $id;
+    #[MongoDB\Id]
+    #[Groups(["story"])]
+    private string $id;
 
-    /**
-     * @var int
-     * @MongoDB\Field(type="integer")
-     * @Groups({"story"})
-     */
-    protected $from;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["story"])]
+    private int $from;
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"story"})
-     */
-    private $rootPath;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["story"])]
+    private string $rootPath;
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"story"})
-     */
-    private $path;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["story"])]
+    private string $path;
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"story"})
-     */
-    private $fileName;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["story"])]
+    private string $fileName;
 
-    /**
-     * @var \DateTimeInterface
-     * @MongoDB\Field(type="date")
-     * @Groups({"story"})
-     */
-    private $date;
+    #[MongoDB\Field(type: "date")]
+    #[Groups(["story"])]
+    private DateTimeInterface $date;
 
-    /**
-     * @var bool|null
-     * @MongoDB\Field(type="boolean")
-     * @Groups({"story"})
-     */
-    private $seen;
+    #[MongoDB\Field(type: "bool")]
+    #[Groups(["story"])]
+    private ?bool $seen; // Zaten nullable
 
-    /**
-     * @return mixed
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @param mixed $id
-     * @return self
-     */
-    public function setId($id)
+    public function setId(string $id): self
     {
         $this->id = $id;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getFrom(): int
     {
         return $this->from;
     }
 
-    /**
-     * @param int $from
-     * @return self
-     */
-    public function setFrom(int $from): StoryGroupItem
+    public function setFrom(int $from): self
     {
         $this->from = $from;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getRootPath(): string
     {
         return $this->rootPath;
     }
 
-    /**
-     * @param string $rootPath
-     * @return self
-     */
     public function setRootPath(string $rootPath): self
     {
         $this->rootPath = $rootPath;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getPath(): string
     {
         return $this->path;
     }
 
-    /**
-     * @param string $path
-     * @return self
-     */
-    public function setPath(string $path): StoryGroupItem
+    public function setPath(string $path): self
     {
         $this->path = $path;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getFileName(): string
     {
         return $this->fileName;
     }
 
-    /**
-     * @param string $fileName
-     * @return StoryGroupItem
-     */
-    public function setFileName(string $fileName): StoryGroupItem
+    public function setFileName(string $fileName): self
     {
         $this->fileName = $fileName;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface
-     */
-    public function getDate(): \DateTimeInterface
+    public function getDate(): DateTimeInterface
     {
         return $this->date;
     }
 
-    /**
-     * @param \DateTimeInterface $date
-     * @return self
-     */
-    public function setDate(\DateTimeInterface $date): self
+    public function setDate(DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
     }
 
-    /**
-     * @return bool|null
-     */
     public function getSeen(): ?bool
     {
         return $this->seen;
     }
 
-    /**
-     * @param bool|null $seen
-     * @return StoryGroupItem
-     */
-    public function setSeen(?bool $seen): StoryGroupItem
+    public function setSeen(?bool $seen): self
     {
         $this->seen = $seen;
         return $this;
     }
-
 }

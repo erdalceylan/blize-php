@@ -6,17 +6,10 @@
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
+/public/files/*
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
-
-###> symfony/phpunit-bridge ###
-.phpunit
-.phpunit.result.cache
-/phpunit.xml
-phpunit.xml.dist
-###< symfony/phpunit-bridge ###
 composer.lock
 symfony.lock
 .idea
-tests

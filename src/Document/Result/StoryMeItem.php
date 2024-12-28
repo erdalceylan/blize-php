@@ -1,219 +1,137 @@
 <?php
 
-
 namespace App\Document\Result;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;
+use DateTimeInterface;
 
-/**
- * @MongoDB\QueryResultDocument()
- */
+#[MongoDB\QueryResultDocument]
 class StoryMeItem
 {
-    /**
-     * @MongoDB\Id
-     * @Groups({"story"})
-     */
-    protected $id;
+    #[MongoDB\Id]
+    #[Groups(["story"])]
+    private string $id;
 
-    /**
-     * @var int
-     * @MongoDB\Field(type="integer")
-     * @Groups({"story"})
-     */
-    protected $from;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["story"])]
+    private int $from;
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"story"})
-     */
-    private $rootPath;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["story"])]
+    private string $rootPath;
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"story"})
-     */
-    private $path;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["story"])]
+    private string $path;
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"story"})
-     */
-    private $fileName;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["story"])]
+    private string $fileName;
 
-    /**
-     * @var \DateTimeInterface
-     * @MongoDB\Field(type="date")
-     * @Groups({"story"})
-     */
-    private $date;
+    #[MongoDB\Field(type: "date")]
+    #[Groups(["story"])]
+    private DateTimeInterface $date;
 
-    /**
-     * @var StoryViewItem[]
-     * @MongoDB\EmbedMany(targetDocument=StoryViewItem::class)
-     * @Groups({"story"})
-     */
-    private $views;
+    #[MongoDB\EmbedMany(targetDocument: StoryViewItem::class)]
+    #[Groups(["story"])]
+    private ArrayCollection $views;
 
-    /**
-     * @var int
-     * @MongoDB\Field (type="integer")
-     * @Groups({"story"})
-     */
-    private $viewsLength;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["story"])]
+    private int $viewsLength;
 
     public function __construct()
     {
         $this->views = new ArrayCollection();
     }
 
-    /**
-     * @return mixed
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @param mixed $id
-     * @return self
-     */
-    public function setId($id)
+    public function setId(string $id): self
     {
         $this->id = $id;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getFrom(): int
     {
         return $this->from;
     }
 
-    /**
-     * @param int $from
-     * @return self
-     */
     public function setFrom(int $from): self
     {
         $this->from = $from;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getRootPath(): string
     {
         return $this->rootPath;
     }
 
-    /**
-     * @param string $rootPath
-     * @return self
-     */
     public function setRootPath(string $rootPath): self
     {
         $this->rootPath = $rootPath;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getPath(): string
     {
         return $this->path;
     }
 
-    /**
-     * @param string $path
-     * @return self
-     */
     public function setPath(string $path): self
     {
         $this->path = $path;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getFileName(): string
     {
         return $this->fileName;
     }
 
-    /**
-     * @param string $fileName
-     * @return self
-     */
     public function setFileName(string $fileName): self
     {
         $this->fileName = $fileName;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface
-     */
-    public function getDate(): \DateTimeInterface
+    public function getDate(): DateTimeInterface
     {
         return $this->date;
     }
 
-    /**
-     * @param \DateTimeInterface $date
-     * @return self
-     */
-    public function setDate(\DateTimeInterface $date): self
+    public function setDate(DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
     }
 
-    /**
-     * @return StoryViewItem[]
-     */
-    public function getViews()
+    public function getViews(): ArrayCollection
     {
         return $this->views;
     }
 
-    /**
-     * @param StoryViewItem[] $views
-     * @return StoryGroupItem
-     */
     public function setViews(array $views): self
     {
-        $this->views = $views;
+        $this->views = new ArrayCollection($views);
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getViewsLength(): int
     {
         return $this->viewsLength;
     }
 
-    /**
-     * @param int $viewsLength
-     * @return self
-     */
     public function setViewsLength(int $viewsLength): self
     {
         $this->viewsLength = $viewsLength;
         return $this;
     }
-
 }

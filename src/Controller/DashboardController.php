@@ -2,18 +2,15 @@
 
 namespace App\Controller;
 
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-class DashboardController extends AbstractController
+class DashboardController extends AbstractRestController
 {
-    /**
-     * @Route("/dashboard", name="dashboard")
-     * @IsGranted("ROLE_USER")
-     * @Template()
-     */
+    #[Route(path: '/dashboard', name: 'dashboard')]
+    #[IsGranted('ROLE_USER')]
+    #[Template(template: 'dashboard/index.html.twig')]
     public function index()
     {
         return [];

@@ -3,90 +3,55 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-/**
- * @ORM\Entity(repositoryClass=UserRepository::class)
- * @UniqueEntity(fields="email", message="Email already taken")
- * @UniqueEntity(fields="username", message="Username already taken")
- */
-class User implements UserInterface
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\UniqueConstraint(fields: ['email'])]
+#[ORM\UniqueConstraint(fields: ['username'])]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * @var int
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     * @Groups({"user", "user.id"})
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    #[Groups(["user", "user.id"])]
+    private ?int $id = null;
 
-    /**
-     * @var string|null
-     * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups({"user.email"})
-     */
-    private $email;
+    #[ORM\Column(length: 180)]
+    private ?string $email = null;
 
-    /**
-     * @var string|null
-     * @Assert\Regex(
-     *     pattern     = "/^[a-z]+$/i",
-     * )
-     * @ORM\Column(type="string", length=180, unique=true)
-     * @Groups({"user", "user.username"})
-     */
-    private $username;
+    #[ORM\Column(length: 180, unique: true)]
+    #[Assert\Regex(pattern: "/^[a-z]+$/i")]
+    #[Groups(["user", "user.username"])]
+    private ?string $username = null;
 
-    /**
-     * @var string The hashed password
-     * @ORM\Column(type="string")
-     */
-    private $password;
+    #[ORM\Column(length: 64, nullable: true)]
+    #[Assert\Regex(pattern: "/([\p{L}]+$)/u")]
+    #[Groups(["user", "user.firstName"])]
+    private ?string $firstName = null;
 
-    /**
-     * @var string|null
-     * @Assert\Regex(
-     *     pattern     = "/([\p{L}]+$)/u",
-     * )
-     * @ORM\Column(type="string", length=64, nullable=true)
-     * @Groups({"user", "user.firstNnwme"})
-     */
-    private $firstName;
+    #[ORM\Column(length: 64, nullable: true)]
+    #[Assert\Regex(pattern: "/([\p{L}]+$)/u")]
+    #[Groups(["user", "user.lastName"])]
+    private ?string $lastName = null;
 
-    /**
-     * @var string|null
-     * @Assert\Regex(
-     *     pattern     = "/([\p{L}]+$)/u",
-     * )
-     * @ORM\Column(type="string", length=64, nullable=true)
-     * @Groups({"user", "user.lastName"})
-     */
-    private $lastName;
+    #[ORM\Column(length: 256, nullable: true)]
+    #[Groups(["user", "user.image"])]
+    private ?string $image = null;
 
-    /**
-     * @var string|null
-     * @ORM\Column(type="string", length=256, nullable=true)
-     * @Groups({"user", "user.image"})
-     */
-    private $image;
+    #[ORM\Column(type: 'datetime', options: ['default' => 'CURRENT_TIMESTAMP'])]
+    #[Groups(["user", "user.lastSeen"])]
+    private ?DateTimeInterface $lastSeen = null;
 
-    /**
-     * @var \DateTimeInterface
-     * @ORM\Column(type="datetime", options={"default": "CURRENT_TIMESTAMP"})
-     * @Groups({"user", "user.lastSeen"})
-     */
-    private $lastSeen;
+    #[ORM\Column]
+    private array $roles = [];
 
-    /**
-     * @var array
-     * @ORM\Column(type="json")
-     */
-    private $roles = [];
+    #[ORM\Column]
+    private ?string $password = null;
 
     public function getId(): ?int
     {
@@ -98,9 +63,10 @@ class User implements UserInterface
         return $this->email;
     }
 
-    public function setEmail(string $email): User
+    public function setEmail(string $email): static
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -109,36 +75,18 @@ class User implements UserInterface
         return $this->username;
     }
 
-    public function setUsername(?string $username): User
+    public function setUsername(string $username): User
     {
         $this->username = $username;
         return $this;
     }
 
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
-
-    public function setPassword(string $password): User
-    {
-        $this->password = $password;
-        return $this;
-    }
-
-    /**
-     * @return string|null
-     */
     public function getFirstName(): ?string
     {
         return $this->firstName;
     }
 
-    /**
-     * @param string|null $firstName
-     * @return User
-     */
-    public function setFirstName(?string $firstName): User
+    public function setFirstName(string $firstName): User
     {
         $this->firstName = $firstName;
         return $this;
@@ -149,7 +97,7 @@ class User implements UserInterface
         return $this->lastName;
     }
 
-    public function setLastName(?string $lastName): User
+    public function setLastName(string $lastName): User
     {
         $this->lastName = $lastName;
         return $this;
@@ -166,19 +114,31 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getLastSeen(): \DateTimeInterface
+    public function getLastSeen(): ?DateTimeInterface
     {
         return $this->lastSeen;
     }
 
-    public function setLastSeen(\DateTimeInterface $lastSeen): User
+    public function setLastSeen(?DateTimeInterface $lastSeen): User
     {
         $this->lastSeen = $lastSeen;
         return $this;
     }
 
     /**
+     * A visual identifier that represents this user.
+     *
      * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    /**
+     * @see UserInterface
+     *
+     * @return list<string>
      */
     public function getRoles(): array
     {
@@ -189,7 +149,10 @@ class User implements UserInterface
         return array_unique($roles);
     }
 
-    public function setRoles(array $roles): User
+    /**
+     * @param list<string> $roles
+     */
+    public function setRoles(array $roles): static
     {
         $this->roles = $roles;
 
@@ -197,20 +160,26 @@ class User implements UserInterface
     }
 
     /**
-     * @see UserInterface
+     * @see PasswordAuthenticatedUserInterface
      */
-    public function getSalt()
+    public function getPassword(): ?string
     {
-        // not needed when using the "bcrypt" algorithm in security.yaml
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
     }
 
     /**
      * @see UserInterface
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
-
 }

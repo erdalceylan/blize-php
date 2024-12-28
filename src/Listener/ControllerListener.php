@@ -1,60 +1,42 @@
 <?php
 
-
 namespace App\Listener;
 
+use App\Controller\AbstractRestController;
 use App\Entity\User;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerEvent;
-use Symfony\Component\Security\Core\Security;
+use \Symfony\Bundle\SecurityBundle\Security ;
 use Twig\Environment;
 
 class ControllerListener
 {
-    /**
-     * @var Environment
-     */
-    private $twig;
-    /**
-     * @var Security
-     */
-    private $security;
 
     public function __construct(
-        Environment $twig,
-        Security $security
-    )
-    {
-        $this->twig = $twig;
-        $this->security = $security;
-    }
+        private readonly Environment $twig,
+        private readonly Security $security
+    ) {}
 
-    public function onKernelController(ControllerEvent $event)
+    public function onKernelController(ControllerEvent $event): void
     {
-        if (!$event->isMasterRequest() || $event->getRequest()->get('_route') === '_wdt') {
-            // don't do anything if it's not the master request
+        if (!$event->isMainRequest()|| $event->getRequest()->get('_route') === '_wdt') {
             return;
         }
+
         if (!$this->security->getUser() instanceof User) {
             return;
         }
-        //webservice check (angular)
-        if(!$event->getRequest()->headers->has('webService')) {
 
+        if (!$event->getRequest()->headers->has('webService')) {
             $controller = $event->getController();
 
-            // variable check
-            if (is_array($controller) && count($controller)) {
+            if (is_array($controller) && count($controller) > 0) {
 
-                // controller check
-                if ($controller[0] instanceof AbstractFOSRestController) {
-
-                    //if api controller direct call redirect to dashboard
+                if ($controller[0] instanceof AbstractRestController) {
                     $event->setController(function () {
                         return new Response(
                             $this->twig->render('dashboard/index.html.twig'),
-                            200,
+                            Response::HTTP_OK,
                             ['Content-Type' => 'text/html; charset=utf-8']
                         );
                     });

@@ -1,67 +1,45 @@
 <?php
 
-
 namespace App\Document\Result;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;
+use DateTimeInterface;
 
-/**
- * @MongoDB\QueryResultDocument()
- */
+#[MongoDB\QueryResultDocument]
 class StoryViewItem
 {
-    /**
-     * @var int
-     * @MongoDB\Field(type="integer")
-     * @Groups({"story"})
-     */
-    protected $from;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["story"])]
+    private int $from;
 
-    /**
-     * @var \DateTimeInterface
-     * @MongoDB\Field(type="date")
-     * @Groups({"story"})
-     */
-    private $date;
+    #[MongoDB\Field(type: "date")]
+    #[Groups(["story"])]
+    private DateTimeInterface $date;
 
-    /**
-     * @return int
-     */
     public function getFrom(): int
     {
         return $this->from;
     }
 
-    /**
-     * @param int $from
-     * @return StoryViewItem
-     */
-    public function setFrom(int $from): StoryViewItem
+    public function setFrom(int $from): self
     {
         $this->from = $from;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface
-     */
-    public function getDate(): \DateTimeInterface
+    public function getDate(): DateTimeInterface
     {
         return $this->date;
     }
 
-    /**
-     * @param \DateTimeInterface $date
-     * @return StoryViewItem
-     */
-    public function setDate(\DateTimeInterface $date): StoryViewItem
+    public function setDate(DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
     }
 
-    public function toArray()
+    public function toArray(): array
     {
         return get_object_vars($this);
     }

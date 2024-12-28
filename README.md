@@ -1,5 +1,7 @@
 ## PHP Social Media and Chat APP - endpoint
 
+#### symfony 6.4 LTS and PHP 8.1 >= your version
+
 ### Run with Docker
 
 create docker network 
@@ -20,11 +22,13 @@ ddocker exec -ti blize-php bash
 create tabes
 ```sh
 bin/console d:s:u --dump-sql
+//OR
+bin/console doctrine:schema:update --force
 ```
 
 fill dummy users
 ```sh
-bin/console doctrine:fixtures:load
+bin/console fill:fill_users
 ```
 
 fill dummy messages
@@ -34,7 +38,7 @@ bin/console fill:mongo-messages
 
 fill dummy stories
 ```sh
-bin/console fill:mongo-messages
+bin/console fill:mongo-stories
 ```
 
 

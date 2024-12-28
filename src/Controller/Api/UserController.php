@@ -2,90 +2,62 @@
 
 namespace App\Controller\Api;
 
+use App\Controller\AbstractRestController;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\UserService;
 use Firebase\JWT\JWT;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
-use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\View\View;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * @Route("/user")
- */
-class UserController extends AbstractFOSRestController
+#[Route(path: '/user')]
+class UserController extends AbstractRestController
 {
-
-    /**
-     * @Route("/ping", name="user_ping")
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"user"})
-     * @param UserService $userService
-     * @return View
-     */
-    public function ping(UserService $userService)
+    #[Route(path: '/ping', name: 'user_ping', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function ping(UserService $userService): JsonResponse
     {
-        /**@var User $user*/
         $user = $this->getUser();
         $userService->updateLasSeen($user);
 
-        return View::create($user);
+        return $this->json($user, context: ['groups' => ["user"]]);
     }
 
-    /**
-     * @Route("/detail/{user}", name="user_detail")
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"user"})
-     * @param User $user
-     * @return View
-     */
-    public function detail(User $user)
+    #[Route(path: '/detail/{user}', name: 'user_detail', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function detail(User $user): JsonResponse
     {
-        return View::create($user);
+        return $this->json($user, context: ['groups' => ["user"]]);
     }
 
-    /**
-     * @Route("/detail-username/{userName}", name="user_detail_username")
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"user"})
-     * @param UserRepository $userRepository
-     * @param $userName
-     * @return View
-     */
+    #[Route(path: '/detail-username/{userName}', name: 'user_detail_username', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function detailByUsername(
         UserRepository $userRepository,
-        $userName
-    )
-    {
+        string $userName
+    ): JsonResponse {
         $user = $userRepository->findOneBy(['username' => $userName]);
-        return View::create($user);
+
+        return $this->json($user, context: ['groups' => ["user"]]);
     }
 
-    /**
-     * @Route("/jwt", name="user_jwt")
-     * @IsGranted("ROLE_USER")
-     * @return View
-     */
-    public function jwt()
+    #[Route(path: '/jwt', name: 'user_jwt', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
+    public function jwt(): JsonResponse
     {
-        /**@var User $user*/
         $user = $this->getUser();
 
         $privateKey = file_get_contents($this->getParameter('rsa_private'));
-        //$publicKey = file_get_contents($this->getParameter('rsa_public'));
-        //$encoded = JWT::encode(['name' => 'erdal'], $privateKey, 'RS256');
-        //$decoded = JWT::decode($encoded, $publicKey, ['RS256']);
-
 
         $payload = [
-            'exp' => (new \DateTime())->modify('+ 30 second')->getTimestamp(),
-            'user' => json_decode($this->json($user, 200, [], ['groups' => ['user']])->getContent())
+            'exp' => (new \DateTimeImmutable())->modify('+ 30 second')->getTimestamp(),
+            'user' => json_decode($this->json($user, context: ['groups' => ['user']])->getContent(), true)
         ];
 
         $token = JWT::encode($payload, $privateKey, 'RS256');
 
-        return View::create(['token' => $token]);
+        return $this->json(['token' => $token]);
     }
+
 }

@@ -54,7 +54,7 @@ class MessageResponseService
         }, $list);
     }
 
-    public function detail(User $sessionUser, User $otherUser, int $offset = 0)
+    public function detail(User $sessionUser, User $otherUser, int $offset = 0): MessageDetailResponse
     {
         $list = $this->mongoMessageService->detail($sessionUser, $otherUser, $offset);
         $messageResponseItems= [];
@@ -70,13 +70,13 @@ class MessageResponseService
         return MessageDetailResponse::fill($otherUser, $messageResponseItems);
     }
 
-    public function add(User $sessionUser, User $otherUser, ?string $text)
+    public function add(User $sessionUser, User $otherUser, ?string $text): MessageResponse
     {
         $message = $this->mongoMessageService->add($sessionUser, $otherUser, $text);
         return MessageResponse::fill($message, $sessionUser, $otherUser);
     }
 
-    public function read(User $sessionUser, User $otherUser)
+    public function read(User $sessionUser, User $otherUser): mixed
     {
         return $this->mongoMessageService->read($sessionUser, $otherUser);
     }
