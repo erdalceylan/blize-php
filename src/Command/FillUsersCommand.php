@@ -1,39 +1,50 @@
 <?php
 
-namespace App\DataFixtures;
+declare(strict_types=1);
+
+namespace App\Command;
 
 use App\Entity\User;
 use App\Service\UserService;
-use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-class UserFixtures extends Fixture
+#[AsCommand(
+    name: 'fill:fill_users',
+    description: 'Creates default users and Marvel users from API.'
+)]
+class FillUsersCommand extends Command
 {
-    private UserPasswordEncoderInterface $encoder;
+    private UserPasswordHasherInterface $encoder;
     private HttpClientInterface $httpClient;
     private EntityManagerInterface $entityManager;
     private UserService $userService;
 
     public function __construct(
-        UserPasswordEncoderInterface $encoder,
+        UserPasswordHasherInterface $encoder,
         HttpClientInterface $httpClient,
         EntityManagerInterface $entityManager,
         UserService $userService
     )
     {
+        parent::__construct();
+
         $this->encoder = $encoder;
         $this->httpClient = $httpClient;
         $this->entityManager = $entityManager;
         $this->userService = $userService;
     }
-
-    public function load(ObjectManager $manager): void
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->insertDefault();
         $this->insertMarvel();
+
+        return Command::SUCCESS;
     }
 
     private function insertMarvel()
@@ -56,14 +67,13 @@ class UserFixtures extends Fixture
             $username = preg_replace("/[^a-zA-Z0-9]/","", $character['name']);
             $fileUrl = null;
 
-            if (strpos($character['thumbnail']['path'], "image_not_available") === false) {
+            if (!str_contains($character['thumbnail']['path'], "image_not_available")) {
                 $image = $character['thumbnail']['path'].".".$character['thumbnail']['extension'];
 
                 $imageInfo = $this->userService->uploadImage($image);
 
                 $fileUrl = $imageInfo->getRootPath().$imageInfo->getFilePath().$imageInfo->getFileName();
             }
-
 
             $this->insertUser(
                 $character['name'],
@@ -73,8 +83,6 @@ class UserFixtures extends Fixture
                 $fileUrl
             );
         }
-
-        //$query['offset'] = $query['offset'] + $query['limit'];
 
     }
 
@@ -119,7 +127,7 @@ class UserFixtures extends Fixture
         $user->setImage($image);
         $user->setRoles(['ROLE_USER']);
         $user->setLastSeen(new \DateTime());
-        $user->setPassword($this->encoder->encodePassword($user, '123456'));
+        $user->setPassword($this->encoder->hashPassword($user, '123456'));
         $this->entityManager->persist($user);
         $this->entityManager->flush();
     }

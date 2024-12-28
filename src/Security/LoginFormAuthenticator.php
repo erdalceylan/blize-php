@@ -2,168 +2,85 @@
 
 namespace App\Security;
 
-use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response; // Gerekli import
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface; // Yeni import
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
-use Symfony\Component\Security\Core\Exception\InvalidCsrfTokenException;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Core\User\UserProviderInterface;
-use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
-use Symfony\Component\Security\Guard\Authenticator\AbstractFormLoginAuthenticator;
-use Symfony\Component\Security\Guard\PasswordAuthenticatedInterface;
+use Symfony\Component\Security\Http\Authenticator\AbstractLoginFormAuthenticator; // Doğru sınıf
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\CsrfTokenBadge; // Yeni import
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge; // Yeni import
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials; // Yeni import
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport; // Yeni import
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
-/**
- * Class LoginFormAuthenticator
- * @package App\Security
- */
-class LoginFormAuthenticator extends AbstractFormLoginAuthenticator implements PasswordAuthenticatedInterface
+class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 {
     use TargetPathTrait;
 
     public const LOGIN_ROUTE = 'app_login';
 
-    /**
-     * @var EntityManagerInterface
-     */
-    private $entityManager;
-    /**
-     * @var UrlGeneratorInterface
-     */
-    private $urlGenerator;
-    /**
-     * @var CsrfTokenManagerInterface
-     */
-    private $csrfTokenManager;
-    /**
-     * @var UserPasswordEncoderInterface
-     */
-    private $passwordEncoder;
-    /**
-     * @var UserRepository
-     */
+    private EntityManagerInterface $entityManager;
+    private UrlGeneratorInterface $urlGenerator;
+    private CsrfTokenManagerInterface $csrfTokenManager;
+    private UserPasswordHasherInterface $passwordHasher; // Yeni tip
     private UserRepository $userRepository;
 
-    /**
-     * LoginFormAuthenticator constructor.
-     * @param EntityManagerInterface $entityManager
-     * @param UrlGeneratorInterface $urlGenerator
-     * @param CsrfTokenManagerInterface $csrfTokenManager
-     * @param UserPasswordEncoderInterface $passwordEncoder
-     * @param UserRepository $userRepository
-     */
     public function __construct(
         EntityManagerInterface $entityManager,
         UrlGeneratorInterface $urlGenerator,
         CsrfTokenManagerInterface $csrfTokenManager,
-        UserPasswordEncoderInterface $passwordEncoder,
+        UserPasswordHasherInterface $passwordHasher, // Yeni tip
         UserRepository $userRepository
-    )
-    {
+    ) {
         $this->entityManager = $entityManager;
         $this->urlGenerator = $urlGenerator;
         $this->csrfTokenManager = $csrfTokenManager;
-        $this->passwordEncoder = $passwordEncoder;
+        $this->passwordHasher = $passwordHasher; // Yeni atama
         $this->userRepository = $userRepository;
     }
 
-    /**
-     * @param Request $request
-     * @return bool
-     */
-    public function supports(Request $request)
+    public function supports(Request $request): bool // Dönüş tipi eklendi
     {
         return self::LOGIN_ROUTE === $request->attributes->get('_route')
             && $request->isMethod('POST');
     }
 
-    /**
-     * @param Request $request
-     * @return array|mixed
-     */
-    public function getCredentials(Request $request)
+    public function authenticate(Request $request): Passport // Yeni metot ve dönüş tipi
     {
-        $credentials = [
-            'username' => $request->request->get('username'),
-            'password' => $request->request->get('password'),
-            'csrf_token' => $request->request->get('_csrf_token'),
-        ];
-        $request->getSession()->set(
-            Security::LAST_USERNAME,
-            $credentials['username']
+        $username = $request->request->get('username', '');
+        $request->getSession()->set(Security::LAST_USERNAME, $username);
+
+        return new Passport(
+            new UserBadge($username, function() use($username) {
+                $user = $this->userRepository->loadUserByUsername($username);
+
+                if (!$user) {
+                    throw new CustomUserMessageAuthenticationException('Email could not be found.');
+                }
+
+                return $user;
+            }),
+            new PasswordCredentials($request->request->get('password', ''))
         );
-
-        return $credentials;
     }
 
-    /**
-     * @param mixed $credentials
-     * @param UserProviderInterface $userProvider
-     * @return object|UserInterface|null
-     */
-    public function getUser($credentials, UserProviderInterface $userProvider)
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response // Dönüş tipi eklendi
     {
-       /*$token = new CsrfToken('authenticate', $credentials['csrf_token']);
-        if (!$this->csrfTokenManager->isTokenValid($token)) {
-            throw new InvalidCsrfTokenException();
-        }*/
-
-        $user = $this->userRepository->loadUserByUsername($credentials['username']);
-
-        if (!$user) {
-            // fail authentication with a custom error
-            throw new CustomUserMessageAuthenticationException('Email could not be found.'.$credentials['username']);
-        }
-
-        return $user;
-    }
-
-    /**
-     * @param mixed $credentials
-     * @param UserInterface $user
-     * @return bool
-     */
-    public function checkCredentials($credentials, UserInterface $user)
-    {
-        return $this->passwordEncoder->isPasswordValid($user, $credentials['password']);
-    }
-
-    /**
-     * Used to upgrade (rehash) the user's password automatically over time.
-     */
-    public function getPassword($credentials): ?string
-    {
-        return $credentials['password'];
-    }
-
-    /**
-     * @param Request $request
-     * @param TokenInterface $token
-     * @param string $providerKey
-     * @return RedirectResponse|\Symfony\Component\HttpFoundation\Response|null
-     */
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)
-    {
-        if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
+        if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
 
         return new RedirectResponse($this->urlGenerator->generate('dashboard'));
-        //throw new \Exception('TODO: provide a valid redirect inside '.__FILE__);
     }
 
-    /**
-     * @return string
-     */
-    protected function getLoginUrl()
+    protected function getLoginUrl(Request $request): string // Dönüş tipi ve parametre eklendi
     {
         return $this->urlGenerator->generate(self::LOGIN_ROUTE);
     }

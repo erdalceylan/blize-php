@@ -2,141 +2,89 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\User;
+use App\Controller\AbstractRestController;
 use App\Service\MongoStoryService;
 use App\Service\Response\StoryResponseService;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
-use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\Request\ParamFetcherInterface;
-use FOS\RestBundle\View\View;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\HttpFoundation\Request;
 
-/**
- * @Route("/story")
- */
-class StoryController extends AbstractFOSRestController
+#[Route(path: '/story')]
+class StoryController extends AbstractRestController
 {
-
-    /**
-     * @Route("/group-list/{offset}", name="story_list", methods={"GET"})
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"story","user"})
-     * @param StoryResponseService $storyResponseService
-     * @param int $offset
-     * @return View
-     */
+    #[Route(path: '/group-list/{offset}', name: 'story_list', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function groupList(
         StoryResponseService $storyResponseService,
         int $offset = 0
-    ): View
-    {
-        /**@var User $sessionUser*/
+    ): JsonResponse {
         $sessionUser = $this->getUser();
         $response = $storyResponseService->groupList($sessionUser, $offset);
 
-        return  View::create($response);
+        return $this->json($response, context: ['groups' => ["story", "user"]]);
     }
 
-    /**
-     * @Route("/me-list", name="story_me", methods={"GET"})
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"story","user"})
-     * @param StoryResponseService $storyResponseService
-     * @return View
-     */
+    #[Route(path: '/me-list', name: 'story_me', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function meList(
         StoryResponseService $storyResponseService
-    ): View
-    {
-        /**@var User $sessionUser*/
+    ): JsonResponse {
         $sessionUser = $this->getUser();
         $response = $storyResponseService->meList($sessionUser);
 
-        return  View::create($response);
+        return $this->json($response, context: ['groups' => ["story", "user"]]);
     }
 
-    /**
-     * @Route("/view-list/{_id}/{offset}", name="story_views", methods={"GET"})
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"story","user"})
-     * @param StoryResponseService $storyResponseService
-     * @param string $_id
-     * @param int $offset
-     * @return View
-     */
+    #[Route(path: '/view-list/{_id}/{offset}', name: 'story_views', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function viewList(
         StoryResponseService $storyResponseService,
         string $_id,
         int $offset
-    ): View
-    {
-        /**@var User $sessionUser*/
+    ): JsonResponse {
         $sessionUser = $this->getUser();
         $response = $storyResponseService->viewList($sessionUser, $_id, $offset);
 
-        return  View::create($response);
+        return $this->json($response, context: ['groups' => ["story", "user"]]);
     }
 
-    /**
-     * @Route("/add", name="story_add", methods={"POST"})
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"story","user"})
-     * @Rest\FileParam(name="image", image=true)
-     * @param ParamFetcherInterface $paramFetcher
-     * @param StoryResponseService $storyResponseService
-     * @return View
-     */
+    #[Route(path: '/add', name: 'story_add', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function add(
-        ParamFetcherInterface $paramFetcher,
+        Request $request,
         StoryResponseService $storyResponseService
-    ): View
-    {
-        /**@var $image UploadedFile*/
-        $image = $paramFetcher->get("image");
-        /**@var User $sessionUser*/
+    ): JsonResponse {
+        $image = $request->files->get('image');
         $sessionUser = $this->getUser();
         $response = $storyResponseService->add($sessionUser, $image);
 
-        return  View::create($response);
+        return $this->json($response, context: ['groups' => ["story", "user"]]);
     }
 
-    /**
-     * @Route("/seen/{_id}", name="story_seen", methods={"GET"})
-     * @IsGranted("ROLE_USER")
-     * @param StoryResponseService $storyResponseService
-     * @param string $_id
-     * @return View
-     */
+    #[Route(path: '/seen/{_id}', name: 'story_seen', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function seen(
         StoryResponseService $storyResponseService,
         string $_id
-    ): View
-    {
-        /**@var User $sessionUser*/
+    ): JsonResponse {
         $sessionUser = $this->getUser();
         $response = $storyResponseService->seen($sessionUser, $_id);
 
-        return  View::create($response);
+        return $this->json($response, context: ['groups' => ["story", "user"]]);
     }
 
-    /**
-     * @Route("/delete/{_id}", name="story_delete", methods={"GET"})
-     * @IsGranted("ROLE_USER")
-     * @return View
-     */
+    #[Route(path: '/delete/{_id}', name: 'story_delete', methods: ['GET'])]
+    #[IsGranted('ROLE_USER')]
     public function delete(
         MongoStoryService $mongoStoryService,
         string $_id
-    )
-    {
-        /**@var User $sessionUser*/
+    ): JsonResponse {
         $sessionUser = $this->getUser();
 
         $result = $mongoStoryService->delete($sessionUser, $_id);
 
-        return  View::create($result);
+        return $this->json($result, context: ['groups' => ["story", "user"]]);
     }
 
 }

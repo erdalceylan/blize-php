@@ -8,55 +8,35 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 class StoryViewItemResponse
 {
-    /**
-     * @var User
-     * @Groups({"story"})
-     */
-    private $user;
+    #[Groups(["story"])]
+    private User $user;
 
-    /**
-     * @var \DateTimeInterface
-     * @Groups({"story"})
-     */
-    private $date;
+    #[Groups(["story"])]
+    private \DateTimeInterface $date;
 
-    /**
-     * @return User
-     */
     public function getUser(): User
     {
         return $this->user;
     }
 
-    /**
-     * @param User $user
-     * @return self
-     */
     public function setUser(User $user): self
     {
         $this->user = $user;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface
-     */
     public function getDate(): \DateTimeInterface
     {
         return $this->date;
     }
 
-    /**
-     * @param \DateTimeInterface $date
-     * @return self
-     */
     public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
     }
 
-    public static function fill(StoryViewItem $storyViewItem, User $user)
+    public static function fill(StoryViewItem $storyViewItem, User $user): self // Return type eklendi
     {
         $self = new self();
 
@@ -65,5 +45,4 @@ class StoryViewItemResponse
 
         return $self;
     }
-
 }

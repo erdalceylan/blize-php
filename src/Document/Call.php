@@ -1,188 +1,116 @@
 <?php
 
-
 namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;
+use DateTimeInterface;
 
-/**
- * @MongoDB\Document(collection="call")
- */
+#[MongoDB\Document(collection: "call")]
 class Call
 {
-    /**
-     * @MongoDB\Id
-     * @Groups({"call"})
-     */
-    private $id;
+    #[MongoDB\Id]
+    #[Groups(["call"])]
+    private ?string $id;
 
-    /**
-     * @var int
-     * @MongoDB\Field(type="integer")
-     * @Groups({"call"})
-     */
-    private $from;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["call"])]
+    private ?int $from;
 
-    /**
-     * @var int
-     * @MongoDB\Field(type="integer")
-     * @Groups({"call"})
-     */
-    private $to;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["call"])]
+    private ?int $to;
 
-    /**
-     * @var \DateTimeInterface
-     * @MongoDB\Field(type="date")
-     * @Groups({"call"})
-     */
-    private $date;
+    #[MongoDB\Field(type: "date")]
+    #[Groups(["call"])]
+    private ?DateTimeInterface $date;
 
-    /**
-     * @var bool
-     * @MongoDB\Field(type="boolean")
-     * @Groups({"call"})
-     */
-    private $video;
+    #[MongoDB\Field(type: "bool")]
+    #[Groups(["call"])]
+    private ?bool $video;
 
-    /**
-     * @var \DateTimeInterface|null
-     * @MongoDB\Field(type="date", nullable=true)
-     * @Groups({"call"})
-     */
-    private $startDate;
+    #[MongoDB\Field(type: "date", nullable: true)]
+    #[Groups(["call"])]
+    private ?DateTimeInterface $startDate;
 
-    /**
-     * @var \DateTimeInterface|null
-     * @MongoDB\Field(type="date", nullable=true)
-     * @Groups({"call"})
-     */
-    private $endDate;
+    #[MongoDB\Field(type: "date", nullable: true)]
+    #[Groups(["call"])]
+    private ?DateTimeInterface $endDate;
 
-    /**
-     * @return mixed
-     */
-    public function getId()
+    public function getId(): ?string
     {
         return $this->id;
     }
 
-    /**
-     * @param mixed $id
-     * @return Call
-     */
-    public function setId($id)
+    public function setId(string $id): self
     {
         $this->id = $id;
         return $this;
     }
 
-    /**
-     * @return int
-     */
-    public function getFrom(): int
+    public function getFrom(): ?int
     {
         return $this->from;
     }
 
-    /**
-     * @param int $from
-     * @return Call
-     */
-    public function setFrom(int $from): Call
+    public function setFrom(int $from): self
     {
         $this->from = $from;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getTo(): int
     {
         return $this->to;
     }
 
-    /**
-     * @param int $to
-     * @return Call
-     */
-    public function setTo(int $to): Call
+    public function setTo(int $to): self
     {
         $this->to = $to;
         return $this;
     }
 
-    /**
-     * @return bool
-     */
     public function isVideo(): bool
     {
         return $this->video;
     }
 
-    /**
-     * @param bool $video
-     * @return Call
-     */
-    public function setVideo(bool $video): Call
+    public function setVideo(bool $video): self
     {
         $this->video = $video;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface
-     */
-    public function getDate(): \DateTimeInterface
+    public function getDate(): DateTimeInterface
     {
         return $this->date;
     }
 
-    /**
-     * @param \DateTimeInterface $date
-     * @return Call
-     */
-    public function setDate(\DateTimeInterface $date): Call
+    public function setDate(DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getStartDate(): ?\DateTimeInterface
+    public function getStartDate(): ?DateTimeInterface
     {
         return $this->startDate;
     }
 
-    /**
-     * @param \DateTimeInterface|null $startDate
-     * @return Call
-     */
-    public function setStartDate(?\DateTimeInterface $startDate): Call
+    public function setStartDate(?DateTimeInterface $startDate): self
     {
         $this->startDate = $startDate;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface|null
-     */
-    public function getEndDate(): ?\DateTimeInterface
+    public function getEndDate(): ?DateTimeInterface
     {
         return $this->endDate;
     }
 
-    /**
-     * @param \DateTimeInterface|null $endDate
-     * @return Call
-     */
-    public function setEndDate(?\DateTimeInterface $endDate): Call
+    public function setEndDate(?DateTimeInterface $endDate): self
     {
         $this->endDate = $endDate;
         return $this;
     }
-
 }

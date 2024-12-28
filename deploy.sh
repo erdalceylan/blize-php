@@ -14,17 +14,18 @@ mkdir -p var/cache
 ANGULAR_HASH=`cat $pwd/public/dist/ANGULAR_HASH.txt`
 
 cat >> .env <<EOL
-APP_ENV=prod
-APP_SECRET=785acb814ee00d0bc0cc314ff05372823f96bdcf
-DATABASE_URL="mysql://root:root@127.0.0.1:8889/blize?serverVersion=5.7"
-MONGODB_URL=mongodb://127.0.0.1:27017
+APP_ENV=dev
+APP_SECRET=d26646463528db4c11d4facb7f159d07
+
+DATABASE_URL="mysql://blize:blize@host.docker.internal:3306/blize?serverVersion=8.0.32&charset=utf8mb4"
+MONGODB_URL=mongodb://host.docker.internal:27017
 MONGODB_DB=blize
+SOCKET_REDIS_HOST=host.docker.internal
+SOCKET_REDIS_PORT=6379
 RSA_SECRET_KEY=%kernel.project_dir%/config/rsa/private.key
 RSA_PUBLIC_KEY=%kernel.project_dir%/config/rsa/public.crt
 UPLOADED_IMAGES_PATH=/files/images
-SOCKET_REDIS_HOST=127.0.0.1
-SOCKET_REDIS_PORT=6379
-SOCKET_CONNECTION_URL=https://socket.blize.xyz
+SOCKET_CONNECTION_URL=http://localhost:3000
 ANGULAR_HASH=$ANGULAR_HASH
 EOL
 

@@ -1,163 +1,132 @@
 <?php
 
-
 namespace App\Document;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;
+use DateTimeInterface;
 
-/**
- * @MongoDB\Document(collection="story")
- */
+#[MongoDB\Document(collection: "story")]
 class Story
 {
-    /**
-     * @MongoDB\Id
-     * @Groups({"story"})
-     */
-    protected $id;
+    #[MongoDB\Id]
+    #[Groups(["story"])]
+    private string $id; // Nullable değil
 
-    /**
-     * @var int
-     * @MongoDB\Field(type="integer")
-     * @Groups({"story"})
-     */
-    protected $from;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["story"])]
+    private int $from; // Nullable değil
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"story"})
-     */
-    private $rootPath;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["story"])]
+    private string $rootPath; // Nullable değil
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"story"})
-     */
-    private $path;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["story"])]
+    private string $path; // Nullable değil
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"story"})
-     */
-    private $fileName;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["story"])]
+    private string $fileName; // Nullable değil
 
-    /**
-     * @var \DateTimeInterface
-     * @MongoDB\Field(type="date")
-     * @Groups({"story"})
-     */
-    private $date;
+    #[MongoDB\Field(type: "date")]
+    #[Groups(["story"])]
+    private DateTimeInterface $date; // Nullable değil
 
-    /**
-     * @return mixed
-     */
-    public function getId()
+    #[MongoDB\Field(type: "date", nullable: true)]
+    #[Groups(["story"])]
+    private ?DateTimeInterface $startDate; // Sizin eklediğiniz nullable
+
+    #[MongoDB\Field(type: "date", nullable: true)]
+    #[Groups(["story"])]
+    private ?DateTimeInterface $endDate;   // Sizin eklediğiniz nullable
+
+
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @param mixed $id
-     * @return self
-     */
-    public function setId($id)
+    public function setId(string $id): self
     {
         $this->id = $id;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getFrom(): int
     {
         return $this->from;
     }
 
-    /**
-     * @param int $from
-     * @return self
-     */
-    public function setFrom(int $from): Story
+    public function setFrom(int $from): self
     {
         $this->from = $from;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getRootPath(): string
     {
         return $this->rootPath;
     }
 
-    /**
-     * @param string $rootPath
-     * @return self
-     */
     public function setRootPath(string $rootPath): self
     {
         $this->rootPath = $rootPath;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getPath(): string
     {
         return $this->path;
     }
 
-    /**
-     * @param string $path
-     * @return self
-     */
-    public function setPath(string $path): Story
+    public function setPath(string $path): self
     {
         $this->path = $path;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getFileName(): string
     {
         return $this->fileName;
     }
 
-    /**
-     * @param string $fileName
-     * @return Story
-     */
-    public function setFileName(string $fileName): Story
+    public function setFileName(string $fileName): self
     {
         $this->fileName = $fileName;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface
-     */
-    public function getDate(): \DateTimeInterface
+    public function getDate(): DateTimeInterface
     {
         return $this->date;
     }
 
-    /**
-     * @param \DateTimeInterface $date
-     * @return self
-     */
-    public function setDate(\DateTimeInterface $date): self
+    public function setDate(DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
     }
 
+    public function getStartDate(): ?DateTimeInterface
+    {
+        return $this->startDate;
+    }
+
+    public function setStartDate(?DateTimeInterface $startDate): self
+    {
+        $this->startDate = $startDate;
+        return $this;
+    }
+
+    public function getEndDate(): ?DateTimeInterface
+    {
+        return $this->endDate;
+    }
+
+    public function setEndDate(?DateTimeInterface $endDate): self
+    {
+        $this->endDate = $endDate;
+        return $this;
+    }
 }

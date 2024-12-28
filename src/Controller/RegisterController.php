@@ -6,41 +6,38 @@ use App\Entity\User;
 use App\Form\RegisterType;
 use App\Security\LoginFormAuthenticator;
 use App\Service\UserService;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Guard\GuardAuthenticatorHandler;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class RegisterController extends AbstractController
 {
-    /**
-     * @Route("/register", name="register")
-     * @param Request $request
-     * @param UserService $userService
-     * @return Response
-     */
+    #[Template(template: 'register/index.html.twig')]
+    #[Route('/register', name: 'register')]
     public function index(
         Request $request,
         UserService $userService,
-        GuardAuthenticatorHandler $guardAuthenticatorHandler,
+        UserAuthenticatorInterface $userAuthenticator,
         LoginFormAuthenticator $loginFormAuthenticator
-    ): Response
+    )
     {
         $user = new User();
-        $form = $this
-            ->createForm(RegisterType::class, $user)
-            ->handleRequest($request);
+        $form = $this->createForm(RegisterType::class, $user);
+        $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+
             $userService->create($user);
-            return $guardAuthenticatorHandler
-                ->authenticateUserAndHandleSuccess($user, $request, $loginFormAuthenticator, 'main');
+            return $userAuthenticator->authenticateUser($user, $loginFormAuthenticator, $request);
         }
 
-        return $this->render('register/index.html.twig', [
-            'registerForm' => $form->createView(),
-        ]);
+        return [
+            'registerForm' => $form->createView()
+        ];
     }
 
 }

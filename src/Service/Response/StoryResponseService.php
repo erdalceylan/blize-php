@@ -17,21 +17,13 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 class StoryResponseService
 {
-    private MongoStoryService $mongoStoryService;
-    private UserRepository $userRepository;
 
     public function __construct(
-        MongoStoryService $mongoStoryService,
-        UserRepository $userRepository
-    )
-    {
-        $this->mongoStoryService = $mongoStoryService;
-        $this->userRepository = $userRepository;
-    }
+        private readonly MongoStoryService $mongoStoryService,
+        private readonly UserRepository   $userRepository
+    ){}
 
     /**
-     * @param User $sessionUser
-     * @param int $offset
      * @return StoryGroupResponse[]
      */
     public function groupList(User $sessionUser, int $offset = 0): array
@@ -55,7 +47,6 @@ class StoryResponseService
     }
 
     /**
-     * @param User $sessionUser
      * @return StoryMeItemResponse[]
      */
     public function meList(User $sessionUser): array
@@ -90,9 +81,6 @@ class StoryResponseService
     }
 
     /**
-     * @param User $sessionUser
-     * @param string $_id
-     * @param int $offset
      * @return StoryViewItemResponse[]
      */
     public function viewList(User $sessionUser, string $_id, int $offset = 0): array
@@ -115,11 +103,6 @@ class StoryResponseService
         }, $views);
     }
 
-    /**
-     * @param User $sessionUser
-     * @param UploadedFile $uploadedFile
-     * @return StoryResponse|null
-     */
     public function add(User $sessionUser, UploadedFile $uploadedFile): ?StoryResponse
     {
         $story = $this->mongoStoryService->add($sessionUser, $uploadedFile->getRealPath());
@@ -130,22 +113,12 @@ class StoryResponseService
         return null;
     }
 
-    /**
-     * @param User $sessionUser
-     * @param $_id
-     * @return mixed
-     */
-    public function seen(User $sessionUser, $_id)
+    public function seen(User $sessionUser, $_id): mixed
     {
         return $this->mongoStoryService->seen($sessionUser, $_id);
     }
 
-    /**
-     * @param User $sessionUser
-     * @param $_id
-     * @return mixed
-     */
-    public function delete(User $sessionUser, $_id)
+    public function delete(User $sessionUser, $_id): mixed
     {
         return $this->mongoStoryService->delete($sessionUser, $_id);
     }

@@ -2,39 +2,28 @@
 
 namespace App\Controller\Api;
 
+use App\Controller\AbstractRestController;
 use App\Entity\User;
 use App\Repository\UserRepository;
-use FOS\RestBundle\Controller\AbstractFOSRestController;
-use FOS\RestBundle\Controller\Annotations as Rest;
-use FOS\RestBundle\View\View;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
-/**
- * @Route("/search")
- */
-class SearchController extends AbstractFOSRestController
+#[Route(path: '/search')]
+class SearchController extends AbstractRestController
 {
-
-    /**
-     * @Route("/list/{offset}", name="search_list")
-     * @Route("/{offset}", name="search")
-     * @IsGranted("ROLE_USER")
-     * @Rest\View(serializerGroups={"user"})
-     * @param UserRepository $userRepository
-     * @param int $offset
-     * @return View
-     */
+    #[Route(path: '/list/{offset}', name: 'search_list', requirements: ['offset' => '\d+'])]
+    #[Route(path: '/{offset}', name: 'search', requirements: ['offset' => '\d+'])]
+    #[IsGranted('ROLE_USER')]
     public function index(
         UserRepository $userRepository,
         int $offset = 0
-    )
-    {
-        /**@var User $user*/
-        $user = $this->getUser();
-        $user = $userRepository->findAllExclude([$user->getId()], $offset);
+    ): JsonResponse {
+        /** @var User $user */
+        $currentUser = $this->getUser();
+        $users = $userRepository->findAllExclude([$currentUser->getId()], $offset);
 
-        return View::create($user);
+        return $this->json($users, context: ['groups' => ["user"]]);
     }
 
 }

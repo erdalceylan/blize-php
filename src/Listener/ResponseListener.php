@@ -8,35 +8,31 @@ use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 class ResponseListener
 {
-    private ParameterBagInterface $parameterBag;
+    public function __construct(
+        private readonly ParameterBagInterface $parameterBag
+    ){}
 
-    public function __construct(ParameterBagInterface $parameterBag)
+    public function onKernelResponse(ResponseEvent $event): void
     {
-        $this->parameterBag = $parameterBag;
-    }
-
-    public function onKernelResponse(ResponseEvent $event)
-    {
-        if (!$event->isMasterRequest()) {
-            // don't do anything if it's not the master request
+        if (!$event->isMainRequest()) {
             return;
         }
 
         $requestHeaders = $event->getRequest()->headers;
         $response = $event->getResponse();
 
-        if($requestHeaders->has('webService')) {
+        if ($requestHeaders->has('webService')) {
             $response->headers->set("angular-hash", $this->parameterBag->get('angular_hash'));
+        }
 
-        }else {
-            $cookie = new Cookie(
+        if (!$event->getRequest()->cookies->has("socket-connection-url")) {
+            $cookie = Cookie::create( // Cookie::create() kullanımı
                 'socket-connection-url',
                 $this->parameterBag->get('socket_connection_url'),
-                new \DateTime('+ 1 day'),
-                '/',
-                null,
-                false,
-                false
+                new \DateTimeImmutable('+1 day'),
+                path: '/',
+                secure: false,
+                httpOnly: false
             );
 
             $response->headers->setCookie($cookie);

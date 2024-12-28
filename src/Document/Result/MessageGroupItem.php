@@ -1,165 +1,101 @@
 <?php
 
-
 namespace App\Document\Result;
 
 use Doctrine\ODM\MongoDB\Mapping\Annotations as MongoDB;
 use Symfony\Component\Serializer\Annotation\Groups;
+use DateTimeInterface;
 
-/**
- * @MongoDB\QueryResultDocument()
- */
+#[MongoDB\QueryResultDocument]
 class MessageGroupItem
 {
-    /**
-     * @var int
-     * @MongoDB\Field(type="integer")
-     * @Groups({"message"})
-     */
-    protected $from;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["message"])]
+    private ?int $from;
 
-    /**
-     * @var int
-     * @MongoDB\Field(type="integer")
-     * @Groups({"message"})
-     */
-    protected $to;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["message"])]
+    private ?int $to;
 
-    /**
-     * @var string
-     * @MongoDB\Field(type="string")
-     * @Groups({"message"})
-     */
-    private $text;
+    #[MongoDB\Field(type: "string")]
+    #[Groups(["message"])]
+    private ?string $text;
 
-    /**
-     * @var \DateTimeInterface
-     * @MongoDB\Field(type="date")
-     * @Groups({"message"})
-     */
-    private $date;
+    #[MongoDB\Field(type: "date")]
+    #[Groups(["message"])]
+    private ?DateTimeInterface $date;
 
-    /**
-     * @var bool
-     * @MongoDB\Field (type="boolean")
-     * @Groups({"message"})
-     */
-    private $read;
+    #[MongoDB\Field (type: "bool")]
+    #[Groups(["message"])]
+    private bool $read;
 
-    /**
-     * @var int|null
-     * @MongoDB\Field(type="integer")
-     * @Groups({"message"})
-     */
-    private $unReadCount;
+    #[MongoDB\Field(type: "int")]
+    #[Groups(["message"])]
+    private ?int $unReadCount; // Zaten nullable idi
 
-    /**
-     * @return int
-     */
     public function getFrom(): int
     {
         return $this->from;
     }
 
-    /**
-     * @param int $from
-     * @return MessageGroupItem
-     */
-    public function setFrom(int $from): MessageGroupItem
+    public function setFrom(int $from): self
     {
         $this->from = $from;
         return $this;
     }
 
-    /**
-     * @return int
-     */
     public function getTo(): int
     {
         return $this->to;
     }
 
-    /**
-     * @param int $to
-     * @return MessageGroupItem
-     */
-    public function setTo(int $to): MessageGroupItem
+    public function setTo(int $to): self
     {
         $this->to = $to;
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getText(): string
     {
         return $this->text;
     }
 
-    /**
-     * @param string $text
-     * @return MessageGroupItem
-     */
-    public function setText(string $text): MessageGroupItem
+    public function setText(string $text): self
     {
         $this->text = $text;
         return $this;
     }
 
-    /**
-     * @return \DateTimeInterface
-     */
-    public function getDate(): \DateTimeInterface
+    public function getDate(): DateTimeInterface
     {
         return $this->date;
     }
 
-    /**
-     * @param \DateTimeInterface $date
-     * @return MessageGroupItem
-     */
-    public function setDate(\DateTimeInterface $date): MessageGroupItem
+    public function setDate(DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isRead(): ?bool
+    public function isRead(): bool
     {
         return $this->read;
     }
 
-    /**
-     * @param bool $read
-     * @return MessageGroupItem
-     */
-    public function setRead(bool $read): MessageGroupItem
+    public function setRead(bool $read): self
     {
         $this->read = $read;
         return $this;
     }
 
-    /**
-     * @return int|null
-     */
     public function getUnReadCount(): ?int
     {
         return $this->unReadCount;
     }
 
-    /**
-     * @param int|null $unReadCount
-     * @return MessageGroupItem
-     */
-    public function setUnReadCount(?int $unReadCount): MessageGroupItem
+    public function setUnReadCount(?int $unReadCount): self
     {
         $this->unReadCount = $unReadCount;
         return $this;
     }
-
-
 }
